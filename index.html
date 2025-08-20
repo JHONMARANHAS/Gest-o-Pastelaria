@@ -1,38 +1,462 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FoodManager - Sistema de Gestão</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GastroGestor — Sistema de Gestão de Restaurante</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Login e Cadastro -->
-  <div id="auth-container" class="login-container">
-    <h1>FoodManager</h1>
-    <div id="login-box">
-      <h2>Login</h2>
-      <input type="text" id="login-user" placeholder="Usuário">
-      <input type="password" id="login-pass" placeholder="Senha">
-      <button onclick="login()">Entrar</button>
-      <p>Não tem conta? <a href="#" onclick="mostrarCadastro()">Cadastre-se</a></p>
+  <header>
+    <div class="brand">🍽️ <span>GastroGestor — Sistema de Gestão</span> <span class="tag">Restaurante</span></div>
+    <div class="user">
+      <span id="current-user" class="muted">—</span>
+      <button class="btn inline" onclick="logout()">Sair</button>
     </div>
+  </header>
 
-    <div id="register-box" class="hidden">
-      <h2>Cadastro</h2>
-      <input type="text" id="reg-nome" placeholder="Nome completo">
-      <input type="text" id="reg-user" placeholder="Usuário">
-      <input type="password" id="reg-pass" placeholder="Senha">
-      <button onclick="cadastrar()">Cadastrar</button>
-      <p>Já tem conta? <a href="#" onclick="mostrarLogin()">Entrar</a></p>
-    </div>
+  <div class="layout">
+    <aside>
+      <div class="nav" id="sidebar">
+        <!-- Cliente (mantidos + novas abas) -->
+        <button class="active" data-tab="dashboard">📊 Dashboard</button>
+        <button data-tab="produtos">📘 Produtos & Receitas</button>
+        <button data-tab="ingredientes">🧱 Ingredientes</button>
+        <button data-tab="compras">🧾 Compras</button>
+        <button data-tab="despesas">💡 Outras Despesas</button>
+        <button data-tab="estoque">📦 Estoque</button>
+        <button data-tab="vendas">🧺 Vendas</button>
+        <button data-tab="caixa">🏦 Caixa & Lucro</button>
+        <button data-tab="comissoes">👥 Equipe & Comissões</button>
+        <button data-tab="relatorios">📈 Relatórios</button>
+
+        <!-- NOVAS abas do PAINEL DO CLIENTE -->
+        <div class="divider">— Painel do Cliente</div>
+        <button data-tab="cli-dashboard">📊 Dashboard Empresarial</button>
+        <button data-tab="cli-produtos">🗂️ Produtos (Visão)</button>
+        <button data-tab="cli-gestao">🧭 Gestão</button>
+        <button data-tab="cli-financeiro">💼 Financeiro</button>
+        <button data-tab="cli-precificacao">🧮 Precificação</button>
+        <button data-tab="cli-dre">🧾 DRE</button>
+
+        <!-- Administração / Config -->
+        <div class="divider">— Administração</div>
+        <button data-tab="usuarios">🔐 Usuários</button>
+        <button data-tab="config">⚙️ Configurações</button>
+        <button data-tab="backup">🗄️ Backup</button>
+      </div>
+    </aside>
+
+    <main>
+      <!-- DASHBOARD ORIGINAL (mantido) -->
+      <section id="tab-dashboard" class="grid cols-3">
+        <div class="card kpi">
+          <div>
+            <div class="muted">Faturamento (30 dias)</div>
+            <strong id="kpi-fat">R$ 0,00</strong>
+          </div>
+          <span id="kpi-fat-var" class="chip ok">+0%</span>
+        </div>
+        <div class="card kpi">
+          <div>
+            <div class="muted">Lucro (30 dias)</div>
+            <strong id="kpi-lucro">R$ 0,00</strong>
+          </div>
+          <span id="kpi-margem" class="chip">0% margem</span>
+        </div>
+        <div class="card kpi">
+          <div>
+            <div class="muted">Progresso meta do mês</div>
+            <strong id="kpi-meta">0%</strong>
+          </div>
+          <span id="kpi-meta-valor" class="chip">R$ 0/0</span>
+        </div>
+
+        <div class="card">
+          <h3>Vendas — últimos 30 dias</h3>
+          <canvas id="ch-vendas" height="120"></canvas>
+        </div>
+        <div class="card">
+          <h3>Top produtos</h3>
+          <table id="tb-top"></table>
+        </div>
+        <div class="card">
+          <h3>Avisos</h3>
+          <div id="avisos" class="muted">Sem avisos.</div>
+        </div>
+      </section>
+
+      <!-- INGREDIENTES -->
+      <section id="tab-ingredientes" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Novo ingrediente</h3>
+          <div class="row">
+            <div><label>Nome</label><input id="ing-nome" /></div>
+            <div><label>Unidade (kg, un, L)</label><input id="ing-uni" placeholder="un"/></div>
+          </div>
+          <div class="row">
+            <div><label>Custo por unidade (R$)</label><input id="ing-custo" type="number" step="0.01"/></div>
+            <div><label>Estoque mínimo</label><input id="ing-min" type="number" step="0.01" value="0"/></div>
+          </div>
+          <div class="right"><button class="btn primary" onclick="addIngrediente()">Adicionar</button></div>
+        </div>
+        <div class="card"><h3>Lista de ingredientes</h3><table id="tbl-ingredientes"></table></div>
+      </section>
+
+      <!-- PRODUTOS & RECEITAS -->
+      <section id="tab-produtos" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Novo produto (receita/BOM)</h3>
+          <div class="row">
+            <div><label>Nome do produto</label><input id="rec-nome" placeholder="Pastel de Carne"/></div>
+            <div><label>Margem (%)</label><input id="rec-margem" type="number" value="40"/></div>
+          </div>
+          <div id="rec-itens"></div>
+          <div class="row">
+            <button class="btn inline" onclick="addLinhaReceita()">+ Ingrediente</button>
+            <button class="btn primary" onclick="salvarReceita()">Salvar produto</button>
+          </div>
+        </div>
+        <div class="card"><h3>Produtos cadastrados</h3><table id="tbl-receitas"></table></div>
+      </section>
+
+      <!-- COMPRAS -->
+      <section id="tab-compras" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Registrar compra (insumos)</h3>
+          <div class="row">
+            <div><label>Fornecedor</label><input id="forn" placeholder="Mercado Central"/></div>
+            <div><label>Data</label><input id="comp-data" type="date"/></div>
+          </div>
+          <div class="row">
+            <div><label>Ingrediente</label><select id="comp-ing"></select></div>
+            <div><label>Quantidade</label><input id="comp-qtd" type="number" step="0.01"/></div>
+          </div>
+          <div class="row">
+            <div><label>Custo unitário (R$)</label><input id="comp-custo" type="number" step="0.01"/></div>
+            <div><label>Pagamento</label><select id="comp-pag"><option>Pix</option><option>Dinheiro</option><option>Cartão</option></select></div>
+          </div>
+          <div class="right"><button class="btn primary" onclick="registrarCompra()">Registrar</button></div>
+        </div>
+        <div class="card"><h3>Histórico de compras</h3><table id="tbl-compras"></table></div>
+      </section>
+
+      <!-- OUTRAS DESPESAS -->
+      <section id="tab-despesas" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Lançar despesa</h3>
+          <div class="row">
+            <div><label>Categoria</label><select id="desp-cat"></select></div>
+            <div><label>Descrição</label><input id="desp-desc" placeholder="Energia elétrica"/></div>
+          </div>
+          <div class="row">
+            <div><label>Valor (R$)</label><input id="desp-valor" type="number" step="0.01"/></div>
+            <div><label>Data</label><input id="desp-data" type="date"/></div>
+          </div>
+          <div class="right"><button class="btn primary" onclick="registrarDespesa()">Lançar</button></div>
+        </div>
+        <div class="card"><h3>Despesas por categoria</h3><table id="tbl-despesas"></table></div>
+      </section>
+
+      <!-- ESTOQUE -->
+      <section id="tab-estoque" style="display:none" class="grid cols-2">
+        <div class="card"><h3>Estoque atual</h3><table id="tbl-estoque"></table></div>
+        <div class="card">
+          <h3>Ajustes / Perdas</h3>
+          <div class="row">
+            <div><label>Ingrediente</label><select id="aj-ing"></select></div>
+            <div><label>Quantidade (+ / -)</label><input id="aj-qtd" type="number" step="0.01"/></div>
+          </div>
+          <div class="right"><button class="btn" onclick="ajustarEstoque()">Aplicar ajuste</button></div>
+          <div class="footer">Use negativos para perdas.</div>
+        </div>
+      </section>
+
+      <!-- VENDAS -->
+      <section id="tab-vendas" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Nova venda</h3>
+          <div class="row">
+            <div><label>Produto</label><select id="ven-prod"></select></div>
+            <div><label>Quantidade</label><input id="ven-qtd" type="number" value="1"/></div>
+          </div>
+          <div class="row">
+            <div><label>Preço unitário (sugerido)</label><input id="ven-preco" type="number" step="0.01"/></div>
+            <div><label>Pagamento</label><select id="ven-pag"><option>Pix</option><option>Dinheiro</option><option>Cartão</option></select></div>
+          </div>
+          <div class="row">
+            <div><label>Vendedor</label><select id="ven-user"></select></div>
+            <div><label>Cliente (opcional)</label><input id="ven-cliente" placeholder="João"/></div>
+          </div>
+          <div class="row">
+            <button class="btn" onclick="imprimirCupom()">🖨️ Imprimir</button>
+            <button class="btn" onclick="enviarWhats()">WhatsApp</button>
+            <button class="btn primary" onclick="registrarVenda()">Finalizar venda</button>
+          </div>
+          <div class="footer">Baixa automática de ingredientes conforme receita.</div>
+        </div>
+        <div class="card"><h3>Histórico de vendas</h3><table id="tbl-vendas"></table></div>
+      </section>
+
+      <!-- CAIXA & LUCRO -->
+      <section id="tab-caixa" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Resumo do período</h3>
+          <div class="row">
+            <div><label>De</label><input id="cx-de" type="date"/></div>
+            <div><label>Até</label><input id="cx-ate" type="date"/></div>
+          </div>
+          <div class="row">
+            <div class="card"><div class="muted">Receita de vendas</div><strong id="cx-receita">R$ 0,00</strong></div>
+            <div class="card"><div class="muted">Custos (compras + despesas)</div><strong id="cx-custos">R$ 0,00</strong></div>
+          </div>
+          <div class="kpi card">
+            <div><div class="muted">Lucro operacional</div><strong id="cx-lucro">R$ 0,00</strong></div>
+            <span id="cx-margem" class="chip">0%</span>
+          </div>
+          <h3 style="margin:10px 0 4px">Divisão do lucro</h3>
+          <div class="row">
+            <div><label>Pró-labore (%)</label><input id="cx-prolabore" type="number" value="20"/></div>
+            <div><label>Caixa (%)</label><input id="cx-caixa" type="number" value="40"/></div>
+            <div><label>Reserva (%)</label><input id="cx-reserva" type="number" value="40"/></div>
+          </div>
+          <div class="right" style="margin-top:8px">
+            <button class="btn primary" onclick="calcularDistribuicao()">Calcular distribuição</button>
+          </div>
+          <table id="tbl-distrib"></table>
+        </div>
+        <div class="card"><h3>Movimentações de caixa</h3><table id="tbl-caixa"></table></div>
+      </section>
+
+      <!-- EQUIPE & COMISSÕES -->
+      <section id="tab-comissoes" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Cadastrar colaborador</h3>
+          <div class="row">
+            <div><label>Nome</label><input id="colab-nome"/></div>
+            <div><label>% Comissão sobre venda</label><input id="colab-perc" type="number" step="0.1" value="2"/></div>
+          </div>
+          <div class="right"><button class="btn primary" onclick="addColab()">Adicionar</button></div>
+        </div>
+        <div class="card">
+          <h3>Comissões do período</h3>
+          <div class="row">
+            <div><label>De</label><input id="com-de" type="date"/></div>
+            <div><label>Até</label><input id="com-ate" type="date"/></div>
+          </div>
+          <div class="right"><button class="btn" onclick="renderComissoes()">Calcular</button></div>
+          <table id="tbl-colab"></table>
+        </div>
+      </section>
+
+      <!-- RELATÓRIOS -->
+      <section id="tab-relatorios" style="display:none" class="grid cols-2">
+        <div class="card"><h3>Faturamento por dia (30 dias)</h3><canvas id="rl-fat" height="140"></canvas></div>
+        <div class="card"><h3>Lucro por dia (30 dias)</h3><canvas id="rl-luc" height="140"></canvas></div>
+        <div class="card"><h3>Vendas por mês (12 meses)</h3><canvas id="rl-mes" height="140"></canvas></div>
+      </section>
+
+      <!-- ====== NOVO: PAINEL DO CLIENTE ====== -->
+
+      <!-- DASHBOARD EMPRESARIAL -->
+      <section id="tab-cli-dashboard" style="display:none" class="grid cols-3">
+        <div class="row" style="grid-column:1/-1">
+          <div class="card" style="flex:1">
+            <h3>Período</h3>
+            <div class="row">
+              <div><label>De</label><input id="cli-de" type="date"/></div>
+              <div><label>Até</label><input id="cli-ate" type="date"/></div>
+              <div class="right" style="align-self:flex-end">
+                <button class="btn" onclick="cliPeriodoPreset(7)">7d</button>
+                <button class="btn" onclick="cliPeriodoPreset(30)">30d</button>
+                <button class="btn" onclick="cliPeriodoPreset(90)">90d</button>
+                <button class="btn primary" onclick="renderCliDashboard()">Aplicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card kpi"><div><div class="muted">Faturamento</div><strong id="cli-fat">R$ 0,00</strong></div><span id="cli-var" class="chip ok">—</span></div>
+        <div class="card kpi"><div><div class="muted">Despesas</div><strong id="cli-desp">R$ 0,00</strong></div><span class="chip">—</span></div>
+        <div class="card kpi"><div><div class="muted">Lucro</div><strong id="cli-lucro">R$ 0,00</strong></div><span id="cli-margem" class="chip">0%</span></div>
+
+        <div class="card" style="grid-column:1/-1">
+          <h3>Faturamento x Despesas x Lucro</h3>
+          <canvas id="cli-ch-fatdespluc" height="140"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>Pedidos por dia</h3>
+          <canvas id="cli-ch-pedidos" height="120"></canvas>
+        </div>
+        <div class="card">
+          <h3>Ticket médio</h3>
+          <div class="kpi"><strong id="cli-ticket">R$ 0,00</strong><span class="chip">média</span></div>
+          <div class="footer">Ticket médio = Faturamento / Nº de vendas</div>
+        </div>
+        <div class="card">
+          <h3>Top produtos</h3>
+          <table id="cli-top-prod"></table>
+        </div>
+      </section>
+
+      <!-- PRODUTOS (VISÃO) -->
+      <section id="tab-cli-produtos" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Produtos cadastrados</h3>
+          <table id="cli-tbl-produtos"></table>
+        </div>
+        <div class="card">
+          <h3>Detalhes & Sugestões</h3>
+          <div id="cli-prod-detalhes" class="muted">Selecione um produto para ver custo, preço e margem sugerida.</div>
+        </div>
+      </section>
+
+      <!-- GESTÃO -->
+      <section id="tab-cli-gestao" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Estoque — Itens críticos</h3>
+          <table id="cli-estoque-critico"></table>
+        </div>
+        <div class="card">
+          <h3>Resumo de vendas (30 dias)</h3>
+          <table id="cli-resumo-vendas"></table>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section id="tab-cli-financeiro" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Fluxo por dia (período)</h3>
+          <div class="row">
+            <div><label>De</label><input id="cli-fin-de" type="date"/></div>
+            <div><label>Até</label><input id="cli-fin-ate" type="date"/></div>
+            <div class="right"><button class="btn primary" onclick="renderCliFinanceiro()">Aplicar</button></div>
+          </div>
+          <canvas id="cli-ch-fluxo" height="140"></canvas>
+        </div>
+        <div class="card">
+          <h3>Resumo</h3>
+          <table id="cli-fin-resumo"></table>
+        </div>
+      </section>
+
+      <!-- PRECIFICAÇÃO -->
+      <section id="tab-cli-precificacao" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Calculadora de preço</h3>
+          <div class="row">
+            <div><label>Produto</label><select id="cli-preci-prod"></select></div>
+            <div><label>Margem (%)</label><input id="cli-preci-margem" type="number" value="40"/></div>
+          </div>
+          <div class="right"><button class="btn primary" onclick="cliCalcularPreco()">Calcular</button></div>
+        </div>
+        <div class="card">
+          <h3>Resultado</h3>
+          <table id="cli-preci-resultado"></table>
+        </div>
+      </section>
+
+      <!-- DRE -->
+      <section id="tab-cli-dre" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>DRE — Demonstrativo de Resultados</h3>
+          <div class="row">
+            <div><label>De</label><input id="cli-dre-de" type="date"/></div>
+            <div><label>Até</label><input id="cli-dre-ate" type="date"/></div>
+            <div class="right"><button class="btn primary" onclick="renderCliDRE()">Gerar</button></div>
+          </div>
+          <table id="cli-dre-tbl"></table>
+        </div>
+        <div class="card">
+          <h3>Observações</h3>
+          <div class="muted">O DRE simplificado considera: Receita Bruta (vendas), Custos (compras) e Despesas operacionais (lançamentos). Impostos e depreciação não inclusos.</div>
+        </div>
+      </section>
+      <!-- ====== FIM PAINEL DO CLIENTE ====== -->
+
+      <!-- USUÁRIOS -->
+      <section id="tab-usuarios" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Novo usuário</h3>
+          <div class="row"><div><label>Nome</label><input id="usr-nome"/></div><div><label>Usuário (login)</label><input id="usr-user"/></div></div>
+          <div class="row"><div><label>Senha</label><input id="usr-senha" type="password"/></div><div><label>Perfil</label><select id="usr-role"><option value="admin">Admin</option><option value="financeiro">Financeiro</option><option value="operacional">Operacional</option></select></div></div>
+          <div class="right"><button class="btn primary" onclick="addUsuario()">Criar</button></div>
+        </div>
+        <div class="card"><h3>Usuários cadastrados</h3><table id="tbl-usuarios"></table></div>
+      </section>
+
+      <!-- CONFIGURAÇÕES -->
+      <section id="tab-config" style="display:none" class="grid cols-2">
+        <div class="card">
+          <h3>Geral</h3>
+          <label>Nome da loja</label><input id="cfg-nome" placeholder="Minha Restaurante"/>
+          <label>WhatsApp padrão (DDI+DDD+número)</label><input id="cfg-whats" placeholder="5598984392551"/>
+          <div class="row"><div><label>Meta diária (R$)</label><input id="cfg-meta-dia" type="number" step="0.01"/></div><div><label>Meta mensal (R$)</label><input id="cfg-meta-mes" type="number" step="0.01"/></div></div>
+          <div class="right" style="margin-top:8px"><button class="btn primary" onclick="salvarConfig()">Salvar configurações</button></div>
+          <div class="footer">Ao salvar, metas aparecem no dashboard.</div>
+        </div>
+        <div class="card">
+          <h3>Categorias de Despesa</h3>
+          <div class="row"><div><label>Nova categoria</label><input id="cat-nome" placeholder="Energia, Marketing, Embalagens..."/></div><div><label>&nbsp;</label><button class="btn" onclick="addCategoria()">Adicionar</button></div></div>
+          <table id="tbl-categorias"></table>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section id="tab-backup" style="display:none" class="grid cols-2">
+        <div class="card"><h3>Exportar</h3><button class="btn" onclick="exportarJSON()">Baixar backup (.json)</button></div>
+        <div class="card"><h3>Importar</h3><input id="bk-file" type="file" accept="application/json"/><div class="right" style="margin-top:8px"><button class="btn" onclick="importarJSON()">Importar backup</button></div></div>
+      </section>
+    </main>
   </div>
 
-  <!-- Painel do Usuário -->
-  <div id="dashboard" class="hidden dashboard">
-    <h1>Bem-vindo ao FoodManager</h1>
-    <p id="status-conta"></p>
-    <button onclick="logout()">Sair</button>
+  <!-- MODAL LOGIN / CADASTRO -->
+  <div id="modal-login" class="modal">
+    <div class="panel">
+      <div class="tabs">
+        <button id="lg-tab-login" class="tab active" onclick="switchAuthTab('login')">Entrar</button>
+        <button id="lg-tab-cadastro" class="tab" onclick="switchAuthTab('cadastro')">Cadastrar</button>
+      </div>
+
+      <!-- Login -->
+      <div id="auth-login">
+        <h3>Acessar o GastroGestor</h3>
+        <div class="row">
+          <div><label>Usuário</label><input id="login-user" placeholder="admin"/></div>
+          <div><label>Senha</label><input id="login-pass" type="password" placeholder="admin"/></div>
+        </div>
+        <div class="right" style="margin-top:8px">
+          <button class="btn" onclick="fecharLogin(true)">Fechar</button>
+          <button class="btn primary" onclick="validarLogin()">Entrar</button>
+        </div>
+        <div class="footer">Use admin/admin no primeiro acesso.</div>
+      </div>
+
+      <!-- Cadastro -->
+      <div id="auth-cadastro" class="hidden">
+        <h3>Criar conta (teste 7 dias)</h3>
+        <div class="row">
+          <div><label>Nome</label><input id="cad-nome" placeholder="Seu nome"/></div>
+          <div><label>Usuário (login)</label><input id="cad-user" placeholder="meuusuario"/></div>
+        </div>
+        <div class="row">
+          <div><label>Senha</label><input id="cad-senha" type="password" placeholder="********"/></div>
+          <div><label>Perfil</label>
+            <select id="cad-role">
+              <option value="operacional">Operacional</option>
+              <option value="financeiro">Financeiro</option>
+            </select>
+          </div>
+        </div>
+        <div class="right" style="margin-top:8px">
+          <button class="btn" onclick="switchAuthTab('login')">Cancelar</button>
+          <button class="btn primary" onclick="cadastrarUsuario()">Cadastrar</button>
+        </div>
+        <div class="footer">Seu acesso ficará ativo por 7 dias a partir do cadastro.</div>
+      </div>
+    </div>
   </div>
 
   <script src="sgp.js"></script>
