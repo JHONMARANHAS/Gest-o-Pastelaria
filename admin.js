@@ -1,15 +1,18 @@
-// Senha fixa do administrador
-const SENHA_ADMIN = "admin123";
+// Credenciais do administrador
+const ADMIN_USER = "jhonmaranhas";
+const ADMIN_PASS = "J61772165360j";
 
 // Login do Admin
 function loginAdmin() {
+  const usuario = document.getElementById("admin-usuario").value;
   const senha = document.getElementById("admin-senha").value;
-  if (senha === SENHA_ADMIN) {
+
+  if (usuario === ADMIN_USER && senha === ADMIN_PASS) {
     document.getElementById("admin-login").classList.add("hidden");
     document.getElementById("admin-dashboard").classList.remove("hidden");
     carregarUsuarios();
   } else {
-    alert("Senha incorreta!");
+    alert("Usuário ou senha do admin incorretos!");
   }
 }
 
@@ -17,6 +20,7 @@ function loginAdmin() {
 function logoutAdmin() {
   document.getElementById("admin-login").classList.remove("hidden");
   document.getElementById("admin-dashboard").classList.add("hidden");
+  document.getElementById("admin-usuario").value = "";
   document.getElementById("admin-senha").value = "";
 }
 
@@ -30,7 +34,6 @@ function carregarUsuarios() {
     const diasRestantes = calcularDiasRestantes(u);
 
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${u.nome}</td>
       <td>${u.login}</td>
@@ -41,7 +44,6 @@ function carregarUsuarios() {
         <button onclick="excluirUsuario(${index})">❌ Excluir</button>
       </td>
     `;
-
     tabela.appendChild(tr);
   });
 }
@@ -57,16 +59,16 @@ function calcularDiasRestantes(usuario) {
 // Renovar usuário (+7 dias a partir de hoje)
 function renovarUsuario(index) {
   const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-  usuarios[index].dataCadastro = new Date().toISOString(); // reinicia prazo
+  usuarios[index].dataCadastro = new Date().toISOString();
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
   carregarUsuarios();
   alert("Teste renovado por +7 dias!");
 }
 
-// Bloquear usuário (zera data)
+// Bloquear usuário
 function bloquearUsuario(index) {
   const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-  usuarios[index].dataCadastro = new Date("2000-01-01").toISOString(); // passado
+  usuarios[index].dataCadastro = new Date("2000-01-01").toISOString();
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
   carregarUsuarios();
   alert("Usuário bloqueado!");
