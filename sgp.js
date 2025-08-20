@@ -49,6 +49,48 @@ function show(sec){
 
 // ===== Renderizações =====
 function renderDashboard(){
+let chartVendasSemana, chartCaixa;
+
+function renderGraficos(){
+  // Dados fictícios por enquanto (últimos 7 dias)
+  let dias = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+  let vendas = [5,8,3,7,6,10,4].map(v=>v*10); // simula valores
+  let caixa = [200,350,150,400,280,500,300];
+
+  // gráfico de vendas
+  if(chartVendasSemana) chartVendasSemana.destroy();
+  chartVendasSemana = new Chart(document.getElementById("chart-vendas-semana"), {
+    type: "bar",
+    data: {
+      labels: dias,
+      datasets: [{
+        label: "Vendas (R$)",
+        data: vendas,
+        backgroundColor: "#4cafef"
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display:false } } }
+  });
+
+  // gráfico de caixa
+  if(chartCaixa) chartCaixa.destroy();
+  chartCaixa = new Chart(document.getElementById("chart-caixa"), {
+    type: "line",
+    data: {
+      labels: dias,
+      datasets: [{
+        label: "Caixa (R$)",
+        data: caixa,
+        borderColor: "#ffcc00",
+        backgroundColor: "rgba(255,204,0,0.3)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
   let baixo = S.ing.filter(i=>i.estoque<=i.min).map(i=>i.nome);
   let html = `<p>Saldo em caixa: R$ ${S.caixa.saldo.toFixed(2)}</p>`;
   if(baixo.length){
