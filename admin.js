@@ -1,165 +1,181 @@
-// ==== LOGIN ADMIN ====
-const ADMIN_USER = "jhonmaranhas";
-const ADMIN_PASS = "J61772165360j";
-
-// Recupera do localStorage
-let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-let planos = JSON.parse(localStorage.getItem("planos")) || [];
-
-// LOGIN
+// ======================= LOGIN ADMIN =======================
 function loginAdmin() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
+  const usuario = document.getElementById("adminUsuario").value;
+  const senha = document.getElementById("adminSenha").value;
 
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    atualizarDashboard();
-    carregarUsuarios();
-    carregarPlanos();
+  if (usuario === "jhonmaranhas" && senha === "J61772165360j") {
+    localStorage.setItem("adminLogado", "true");
+    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById("adminPanel").style.display = "flex";
+    carregarDashboard();
   } else {
-    document.getElementById("loginError").innerText = "Usuário ou senha incorretos!";
+    alert("Usuário ou senha incorretos!");
   }
 }
 
-function logout() {
+function logoutAdmin() {
+  localStorage.removeItem("adminLogado");
   document.getElementById("adminPanel").style.display = "none";
-  document.getElementById("loginContainer").style.display = "block";
-  document.getElementById("username").value = "";
-  document.getElementById("password").value = "";
+  document.getElementById("adminLogin").style.display = "flex";
 }
 
-// ==== TROCAR DE ABA ====
-function showSection(section) {
-  document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
-  if (section === "dashboard") document.getElementById("dashboardSection").classList.remove("hidden");
-  if (section === "usuarios") document.getElementById("usuariosSection").classList.remove("hidden");
-  if (section === "planos") document.getElementById("planosSection").classList.remove("hidden");
-  if (section === "relatorios") document.getElementById("relatoriosSection").classList.remove("hidden");
-  if (section === "config") document.getElementById("configSection").classList.remove("hidden");
-}
+// Verifica sessão
+window.onload = () => {
+  if (localStorage.getItem("adminLogado") === "true") {
+    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById("adminPanel").style.display = "flex";
+    carregarDashboard();
+  }
+};
 
-// ==== DASHBOARD ====
-function atualizarDashboard() {
-  const hoje = new Date();
-  let ativos = 0, vencidos = 0;
-
-  usuarios.forEach(u => {
-    const diasRestantes = Math.ceil((new Date(u.expira) - hoje) / (1000 * 60 * 60 * 24));
-    if (diasRestantes > 0) ativos++; else vencidos++;
+// ======================= TROCA DE SEÇÕES =======================
+function showAdminSection(section) {
+  document.querySelectorAll(".admin-section").forEach(sec => {
+    sec.style.display = "none";
   });
-
-  document.getElementById("totalClientes").innerText = usuarios.length;
-  document.getElementById("clientesAtivos").innerText = ativos;
-  document.getElementById("clientesVencidos").innerText = vencidos;
-
-  // Gráfico
-  const ctx = document.getElementById("graficoClientes").getContext("2d");
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Ativos", "Vencidos"],
-      datasets: [{
-        data: [ativos, vencidos],
-        backgroundColor: ["#4caf50", "#f44336"]
-      }]
-    }
-  });
+  document.getElementById(section).style.display = "block";
+  if (section === "dashboard") carregarDashboard();
+  if (section === "clientes") carregarClientes();
+  if (section === "planos") carregarPlanos();
 }
 
-// ==== USUÁRIOS ====
-function carregarUsuarios() {
-  const tabela = document.getElementById("tabelaUsuarios");
+// ======================= CLIENTES =======================
+function carregarClientes() {
+  const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+  const tabela = document.getElementById("tabelaClientes");
   tabela.innerHTML = "";
 
-  const hoje = new Date();
-
-  usuarios.forEach((u, index) => {
-    const diasRestantes = Math.ceil((new Date(u.expira) - hoje) / (1000 * 60 * 60 * 24));
+  clientes.forEach((c, index) => {
+    const hoje = new Date();
+    const vencimento = new Date(c.vencimento);
+    const diasRestantes = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
     const status = diasRestantes > 0 ? "Ativo" : "Vencido";
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${u.username}</td>
+      <td>${c.usuario}</td>
+      <td>${c.email || "-"}</td>
       <td>${status}</td>
-      <td>${diasRestantes > 0 ? diasRestantes + " dias" : "Expirado"}</td>
+      <td>${diasRestantes > 0 ? diasRestantes : 0}</td>
       <td>
-        <button onclick="renovarUsuario(${index})">Renovar</button>
-        <button onclick="removerUsuario(${index})">Remover</button>
+        <button onclick="renovarCliente(${index})">Renovar</button>
+        <button onclick="removerCliente(${index})">Remover</button>
       </td>
     `;
     tabela.appendChild(tr);
   });
 }
 
-function renovarUsuario(index) {
-  const meses = prompt("Quantos meses deseja adicionar?");
-  if (meses && !isNaN(meses)) {
-    let novaData = new Date();
-    novaData.setMonth(novaData.getMonth() + parseInt(meses));
-    usuarios[index].expira = novaData.toISOString().split("T")[0];
-    salvarUsuarios();
-    carregarUsuarios();
-    atualizarDashboard();
+function removerCliente(index) {
+  let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+  clientes.splice(index, 1);
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+  carregarClientes();
+}
+
+// Renovar cliente escolhendo plano
+function renovarCliente(index) {
+  const planos = JSON.parse(localStorage.getItem("planos")) || [];
+  if (planos.length === 0) {
+    alert("Nenhum plano cadastrado!");
+    return;
   }
+
+  let escolha = prompt(
+    "Digite o número do plano para renovar:\n" +
+    planos.map((p, i) => `${i+1} - ${p.nome} (${p.duracao} dias) R$${p.valor}`).join("\n")
+  );
+
+  escolha = parseInt(escolha);
+  if (!escolha || escolha < 1 || escolha > planos.length) return;
+
+  let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+  let cliente = clientes[index];
+
+  const plano = planos[escolha - 1];
+  const hoje = new Date();
+  let novaData = new Date();
+  novaData.setDate(hoje.getDate() + parseInt(plano.duracao));
+
+  cliente.vencimento = novaData.toISOString().split("T")[0];
+  cliente.plano = plano.nome;
+
+  clientes[index] = cliente;
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+  carregarClientes();
+  carregarDashboard();
 }
 
-function removerUsuario(index) {
-  if (confirm("Deseja remover este usuário?")) {
-    usuarios.splice(index, 1);
-    salvarUsuarios();
-    carregarUsuarios();
-    atualizarDashboard();
+// ======================= PLANOS =======================
+function criarPlano() {
+  const nome = document.getElementById("nomePlano").value;
+  const duracao = document.getElementById("duracaoPlano").value;
+  const valor = document.getElementById("valorPlano").value;
+  const acessos = document.getElementById("acessosPlano").value;
+
+  if (!nome || !duracao || !valor || !acessos) {
+    alert("Preencha todos os campos!");
+    return;
   }
-}
 
-function salvarUsuarios() {
-  localStorage.setItem("usuarios", JSON.stringify(usuarios));
-}
-
-// ==== PLANOS ====
-function criarPlano(event) {
-  event.preventDefault();
-
-  const nome = document.getElementById("planoNome").value;
-  const meses = document.getElementById("planoMeses").value;
-  const valor = document.getElementById("planoValor").value;
-  
-  const acessos = [];
-  document.querySelectorAll("#formPlano input[type=checkbox]:checked").forEach(c => acessos.push(c.value));
-
-  planos.push({ nome, meses, valor, acessos });
-  salvarPlanos();
-  carregarPlanos();
+  let planos = JSON.parse(localStorage.getItem("planos")) || [];
+  planos.push({ nome, duracao, valor, acessos });
+  localStorage.setItem("planos", JSON.stringify(planos));
 
   document.getElementById("formPlano").reset();
+  carregarPlanos();
 }
 
 function carregarPlanos() {
+  const planos = JSON.parse(localStorage.getItem("planos")) || [];
   const tabela = document.getElementById("tabelaPlanos");
   tabela.innerHTML = "";
 
-  planos.forEach((p, index) => {
+  planos.forEach(p => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${p.nome}</td>
-      <td>${p.meses}</td>
+      <td>${p.duracao} dias</td>
       <td>R$ ${p.valor}</td>
-      <td>${p.acessos.join(", ")}</td>
-      <td><button onclick="removerPlano(${index})">Remover</button></td>
+      <td>${p.acessos}</td>
     `;
     tabela.appendChild(tr);
   });
 }
 
-function removerPlano(index) {
-  if (confirm("Deseja remover este plano?")) {
-    planos.splice(index, 1);
-    salvarPlanos();
-    carregarPlanos();
-  }
-}
+// ======================= DASHBOARD =======================
+function carregarDashboard() {
+  const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+  let ativos = 0, vencidos = 0;
 
-function salvarPlanos() {
-  localStorage.setItem("planos", JSON.stringify(planos));
+  clientes.forEach(c => {
+    const hoje = new Date();
+    const vencimento = new Date(c.vencimento);
+    const diasRestantes = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+    if (diasRestantes > 0) {
+      ativos++;
+    } else {
+      vencidos++;
+    }
+  });
+
+  document.getElementById("totalClientes").innerText = clientes.length;
+  document.getElementById("clientesAtivos").innerText = ativos;
+  document.getElementById("clientesVencidos").innerText = vencidos;
+
+  // Atualizar gráfico
+  const ctx = document.getElementById("graficoClientes").getContext("2d");
+  if (window.graficoClientes) window.graficoClientes.destroy();
+
+  window.graficoClientes = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Ativos", "Vencidos"],
+      datasets: [{
+        data: [ativos, vencidos],
+        backgroundColor: ["#28a745", "#dc3545"]
+      }]
+    },
+    options: { responsive: true }
+  });
 }
