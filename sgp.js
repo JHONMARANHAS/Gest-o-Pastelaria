@@ -1,177 +1,168 @@
-// ===== DADOS LOCAIS =====
-let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
-let estoque = JSON.parse(localStorage.getItem("estoque")) || [];
-let receitas = JSON.parse(localStorage.getItem("receitas")) || [];
-let financas = JSON.parse(localStorage.getItem("financas")) || [];
-let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [{usuario:"admin", senha:"123"}];
+// =============================
+// VARIÁVEIS GLOBAIS
+// =============================
+let usuarioLogado = null;
 
-// ===== SALVAR =====
-function salvar(){
-  localStorage.setItem("vendas", JSON.stringify(vendas));
-  localStorage.setItem("estoque", JSON.stringify(estoque));
-  localStorage.setItem("receitas", JSON.stringify(receitas));
-  localStorage.setItem("financas", JSON.stringify(financas));
-  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+// =============================
+// TABS LOGIN / CADASTRO
+// =============================
+function toggleForm(form) {
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.getElementById(form).classList.add('active');
+
+  document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.tabs button[onclick="toggleForm('${form}')"]`).classList.add('active');
 }
 
-// ===== SEÇÕES =====
-function mostrarSecao(id){
-  document.querySelectorAll(".sec").forEach(sec=>sec.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  if(id==="sec-dashboard"){ renderDashboard(); renderGraficos(); }
+// =============================
+// CADASTRO DE NOVO USUÁRIO
+// =============================
+function cadastrar() {
+  const nome = document.getElementById('cad-nome').value.trim();
+  const login = document.getElementById('cad-login').value.trim();
+  const senha = document.getElementById('cad-senha').value.trim();
+
+  if (!nome || !login || !senha) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  const key = `sgp_user_${login}`;
+  if (localStorage.getItem(key)) {
+    alert("Este login já está em uso!");
+    return;
+  }
+
+  const hoje = new Date();
+  const dadosUsuario = {
+    nome,
+    login,
+    senha,
+    cadastro: hoje.toISOString(),
+    estoque: [],
+    vendas: [],
+    configuracoes: {}
+  };
+
+  localStorage.setItem(key, JSON.stringify(dadosUsuario));
+  alert("Cadastro realizado com sucesso! Agora faça o login.");
+  toggleForm('login-form');
 }
 
-// ===== VENDAS =====
-function registrarVenda(){
-  let valor = Math.floor(Math.random()*50)+10;
-  let venda = {valor, data: new Date().toLocaleString()};
-  vendas.push(venda);
-  financas.push({tipo:"entrada", valor, data: venda.data});
-  salvar();
-  renderVendas();
+// =============================
+// LOGIN
+// =============================
+function login() {
+  const login = document.getElementById('login-login').value.trim();
+  const senha = document.getElementById('login-senha').value.trim();
+
+  const key = `sgp_user_${login}`;
+  const dados = localStorage.getItem(key);
+
+  if (!dados) {
+    alert("Usuário não encontrado!");
+    return;
+  }
+
+  const usuario = JSON.parse(dados);
+
+  if (usuario.senha !== senha) {
+    alert("Senha incorreta!");
+    return;
+  }
+
+  // Verificar validade de 7 dias
+  const dataCadastro = new Date(usuario.cadastro);
+  const hoje = new Date();
+  const diasPassados = Math.floor((hoje - dataCadastro) / (1000 * 60 * 60 * 24));
+
+  if (diasPassados > 7) {
+    alert("Seu período de teste expirou. Entre em contato com o administrador.");
+    return;
+  }
+
+  usuarioLogado = usuario;
+  document.getElementById('login-container').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
   renderDashboard();
-  renderGraficos();
-}
-function renderVendas(){
-  let ul = document.getElementById("lista-vendas");
-  ul.innerHTML = "";
-  vendas.forEach(v=>{
-    let li = document.createElement("li");
-    li.textContent = `${v.data} - R$ ${v.valor}`;
-    ul.appendChild(li);
-  });
 }
 
-// ===== ESTOQUE =====
-function adicionarItem(){
-  let nome = document.getElementById("novoItem").value;
-  let qtd = parseInt(document.getElementById("qtdItem").value);
-  if(!nome||!qtd) return;
-  estoque.push({nome, qtd});
-  salvar();
-  renderEstoque();
-  document.getElementById("novoItem").value="";
-  document.getElementById("qtdItem").value="";
-}
-function renderEstoque(){
-  let ul = document.getElementById("lista-estoque");
-  ul.innerHTML = "";
-  estoque.forEach(item=>{
-    let li = document.createElement("li");
-    li.textContent = `${item.nome} - ${item.qtd} un.`;
-    ul.appendChild(li);
-  });
-}
+// =============================
+// RENDERIZAR DASHBOARD
+// =============================
+function renderDashboard() {
+  document.getElementById('user-name').textContent = usuarioLogado.nome;
 
-// ===== RECEITAS =====
-function adicionarReceita(){
-  let nome = document.getElementById("novaReceita").value;
-  if(!nome) return;
-  receitas.push({nome});
-  salvar();
-  renderReceitas();
-  document.getElementById("novaReceita").value="";
-}
-function renderReceitas(){
-  let ul = document.getElementById("lista-receitas");
-  ul.innerHTML = "";
-  receitas.forEach(r=>{
-    let li = document.createElement("li");
-    li.textContent = r.nome;
-    ul.appendChild(li);
-  });
-}
+  // Estoque
+  const estoqueList = document.getElementById('estoque-list');
+  estoqueList.innerHTML = '';
+  if (usuarioLogado.estoque.length === 0) {
+    estoqueList.innerHTML = "<p>Sem produtos cadastrados.</p>";
+  } else {
+    usuarioLogado.estoque.forEach(prod => {
+      const li = document.createElement('li');
+      li.textContent = `${prod.nome} — ${prod.quantidade} unidades`;
+      estoqueList.appendChild(li);
+    });
+  }
 
-// ===== FINANÇAS =====
-function renderFinancas(){
-  let ul = document.getElementById("lista-financas");
-  ul.innerHTML = "";
-  financas.forEach(f=>{
-    let li = document.createElement("li");
-    li.textContent = `${f.data} - ${f.tipo} R$ ${f.valor}`;
-    ul.appendChild(li);
-  });
+  // Vendas
+  const vendasList = document.getElementById('vendas-list');
+  vendasList.innerHTML = '';
+  if (usuarioLogado.vendas.length === 0) {
+    vendasList.innerHTML = "<p>Nenhuma venda registrada.</p>";
+  } else {
+    usuarioLogado.vendas.forEach(venda => {
+      const li = document.createElement('li');
+      li.textContent = `${venda.data} — R$ ${venda.valor}`;
+      vendasList.appendChild(li);
+    });
+  }
+
+  // Relatório
+  const totalVendas = usuarioLogado.vendas.reduce((s, v) => s + v.valor, 0);
+  document.getElementById('relatorio-info').innerHTML = `
+    <p>Total de vendas: R$ ${totalVendas.toFixed(2)}</p>
+    <p>Produtos em estoque: ${usuarioLogado.estoque.length}</p>
+    <p>Dias restantes do teste: ${7 - Math.floor((new Date() - new Date(usuarioLogado.cadastro)) / (1000 * 60 * 60 * 24))} dias</p>
+  `;
 }
 
-// ===== USUÁRIOS =====
-function adicionarUsuario(){
-  let usuario = document.getElementById("novoUsuario").value;
-  let senha = document.getElementById("novaSenha").value;
-  if(!usuario||!senha) return;
-  usuarios.push({usuario, senha});
-  salvar();
-  renderUsuarios();
-  document.getElementById("novoUsuario").value="";
-  document.getElementById("novaSenha").value="";
-}
-function renderUsuarios(){
-  let ul = document.getElementById("lista-usuarios");
-  ul.innerHTML = "";
-  usuarios.forEach(u=>{
-    let li = document.createElement("li");
-    li.textContent = u.usuario;
-    ul.appendChild(li);
-  });
+// =============================
+// LOGOUT
+// =============================
+function logout() {
+  usuarioLogado = null;
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('login-container').classList.remove('hidden');
+
+  // Limpa campos de login
+  document.getElementById('login-login').value = '';
+  document.getElementById('login-senha').value = '';
 }
 
-// ===== DASHBOARD =====
-function renderDashboard(){
-  // vendas hoje
-  let hoje = new Date().toLocaleDateString();
-  let vendasHoje = vendas.filter(v=>v.data.includes(hoje));
-  let totalHoje = vendasHoje.reduce((s,v)=>s+v.valor,0);
-  document.getElementById("dash-vendas-hoje").textContent = `R$ ${totalHoje}`;
-
-  // estoque baixo
-  let baixo = estoque.filter(i=>i.qtd<5).length;
-  document.getElementById("dash-estoque-baixo").textContent = baixo;
-
-  // receitas
-  document.getElementById("dash-receitas").textContent = receitas.length;
-
-  // usuários
-  document.getElementById("dash-usuarios").textContent = usuarios.length;
-
-  // alertas
-  let ul = document.getElementById("lista-alertas");
-  ul.innerHTML="";
-  estoque.filter(i=>i.qtd<5).forEach(i=>{
-    let li = document.createElement("li");
-    li.textContent = `⚠️ Estoque baixo: ${i.nome} (${i.qtd} un.)`;
-    ul.appendChild(li);
-  });
-}
-
-// ===== GRÁFICOS =====
-let chartVendasSemana, chartCaixa;
-function renderGraficos(){
-  let dias = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
-  let vendasSemana = [5,8,3,7,6,10,4].map(v=>v*10); // fictício
-  let caixa = [200,350,150,400,280,500,300];
-
-  if(chartVendasSemana) chartVendasSemana.destroy();
-  chartVendasSemana = new Chart(document.getElementById("chart-vendas-semana"), {
-    type: "bar",
-    data: { labels: dias, datasets: [{ label:"Vendas (R$)", data: vendasSemana, backgroundColor: "#4cafef" }] },
-    options: { responsive: true, plugins: { legend: { display:false } } }
-  });
-
-  if(chartCaixa) chartCaixa.destroy();
-  chartCaixa = new Chart(document.getElementById("chart-caixa"), {
-    type: "line",
-    data: { labels: dias, datasets: [{ label:"Caixa (R$)", data: caixa, borderColor:"#ffcc00", backgroundColor:"rgba(255,204,0,0.3)", fill:true, tension:0.3 }] },
-    options: { responsive: true }
-  });
-}
-
-// ===== INICIALIZAÇÃO =====
-function init(){
-  renderVendas();
-  renderEstoque();
-  renderReceitas();
-  renderFinancas();
-  renderUsuarios();
+// =============================
+// ⚙️ Funções extras (adicionar produto/venda etc.)
+// =============================
+// Você pode criar botões e inputs no dashboard e associar a funções como:
+function adicionarProduto(nome, quantidade) {
+  usuarioLogado.estoque.push({ nome, quantidade });
+  salvarUsuario();
   renderDashboard();
-  renderGraficos();
 }
-init();
+
+function registrarVenda(valor) {
+  usuarioLogado.vendas.push({
+    valor: parseFloat(valor),
+    data: new Date().toLocaleDateString()
+  });
+  salvarUsuario();
+  renderDashboard();
+}
+
+// Salvar no localStorage
+function salvarUsuario() {
+  const key = `sgp_user_${usuarioLogado.login}`;
+  localStorage.setItem(key, JSON.stringify(usuarioLogado));
+}
