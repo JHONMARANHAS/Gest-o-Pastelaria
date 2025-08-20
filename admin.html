@@ -3,95 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RestGestor - Painel Admin</title>
+  <title>Gestor Restaurante - Painel Admin</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="admin-container">
-    <aside class="sidebar">
-      <h2>Admin</h2>
-      <ul>
-        <li><a href="#" onclick="showAdminSection('dashboard-admin')">Dashboard</a></li>
-        <li><a href="#" onclick="showAdminSection('clientes-admin')">Clientes</a></li>
-        <li><a href="#" onclick="showAdminSection('planos-admin')">Planos de Acesso</a></li>
-        <li><a href="#" onclick="logoutAdmin()">Sair</a></li>
-      </ul>
-    </aside>
 
-    <main class="main-content">
+  <!-- Login -->
+  <div id="loginScreen" class="content">
+    <h2>Login - Administrador</h2>
+    <form id="loginForm">
+      <label for="username">Usuário:</label>
+      <input type="text" id="username" required>
+
+      <label for="password">Senha:</label>
+      <input type="password" id="password" required>
+
+      <button type="submit" class="primary">Entrar</button>
+    </form>
+    <p id="loginError" style="color:red; display:none;">Usuário ou senha incorretos.</p>
+  </div>
+
+  <!-- Painel Admin -->
+  <div id="adminPanel" class="hidden">
+
+    <!-- Navbar -->
+    <div class="navbar">
+      <h1>Gestor Restaurante - Painel Admin</h1>
+      <button onclick="logout()">Sair</button>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Menu</h2>
+      <ul>
+        <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+        <li><a href="#" onclick="showSection('clientes')">Clientes</a></li>
+        <li><a href="#" onclick="showSection('planos')">Planos</a></li>
+      </ul>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="content">
+
       <!-- Dashboard -->
-      <section id="dashboard-admin" class="admin-section">
-        <h1>📊 Dashboard Administrativo</h1>
-        <div class="cards">
+      <section id="dashboard">
+        <h2>Dashboard</h2>
+        <div class="dashboard-cards">
           <div class="card">
-            <h3>Total de Clientes</h3>
+            <h3>Total Clientes</h3>
             <p id="totalClientes">0</p>
           </div>
           <div class="card">
             <h3>Ativos</h3>
-            <p id="clientesAtivos">0</p>
+            <p id="ativosClientes">0</p>
           </div>
           <div class="card">
             <h3>Vencidos</h3>
-            <p id="clientesVencidos">0</p>
+            <p id="vencidosClientes">0</p>
           </div>
         </div>
-        <canvas id="graficoClientes"></canvas>
+        <canvas id="graficoClientes" width="400" height="200"></canvas>
       </section>
 
       <!-- Clientes -->
-      <section id="clientes-admin" class="admin-section hidden">
-        <h1>👥 Gestão de Clientes</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>Usuário</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Dias Restantes</th>
-              <th>Plano</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaClientes"></tbody>
-        </table>
-      </section>
-
-      <!-- Planos de Acesso -->
-      <section id="planos-admin" class="admin-section hidden">
-        <h1>📑 Planos de Acesso</h1>
-        <div class="form-container">
-          <input type="text" id="nomePlano" placeholder="Nome do Plano">
-          <input type="number" id="duracaoPlano" placeholder="Duração (meses)">
-          <input type="number" id="valorPlano" placeholder="Valor (R$)">
-          <h3>Permissões do Plano:</h3>
-          <label><input type="checkbox" id="permDashboard"> Dashboard</label><br>
-          <label><input type="checkbox" id="permProdutos"> Produtos</label><br>
-          <label><input type="checkbox" id="permGestao"> Gestão</label><br>
-          <label><input type="checkbox" id="permFinanceiro"> Financeiro</label><br>
-          <label><input type="checkbox" id="permPrecificacao"> Precificação</label><br>
-          <label><input type="checkbox" id="permDre"> DRE</label><br>
-          <button onclick="criarPlano()">Criar Plano</button>
-        </div>
-
-        <h2>📋 Lista de Planos</h2>
-        <table>
+      <section id="clientes" class="hidden">
+        <h2>Gestão de Clientes</h2>
+        <table id="clientesTable">
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Duração</th>
-              <th>Valor</th>
-              <th>Permissões</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Dias Restantes</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="tabelaPlanos"></tbody>
+          <tbody></tbody>
         </table>
       </section>
-    </main>
+
+      <!-- Planos -->
+      <section id="planos" class="hidden">
+        <h2>Gerenciamento de Planos</h2>
+        <form id="planoForm">
+          <label for="planoNome">Nome do Plano:</label>
+          <input type="text" id="planoNome" required>
+
+          <label for="planoMeses">Meses de Acesso:</label>
+          <input type="number" id="planoMeses" min="1" required>
+
+          <label for="planoValor">Valor (R$):</label>
+          <input type="number" id="planoValor" min="0" required>
+
+          <label>Acessos Permitidos:</label><br>
+          <input type="checkbox" id="acessoDashboard"> Dashboard<br>
+          <input type="checkbox" id="acessoProdutos"> Produtos<br>
+          <input type="checkbox" id="acessoFinanceiro"> Financeiro<br>
+          <input type="checkbox" id="acessoDRE"> DRE<br>
+
+          <button type="submit" class="success">Criar Plano</button>
+        </form>
+
+        <h3>Planos Cadastrados</h3>
+        <table id="planosTable">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Meses</th>
+              <th>Valor</th>
+              <th>Acessos</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="admin.js"></script>
+  <script src="sgp.js"></script>
 </body>
 </html>
