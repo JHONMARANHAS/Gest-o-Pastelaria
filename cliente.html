@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Cliente - Restaurante Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="clientes.js" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <h1>Restaurante Manager - Área do Cliente</h1>
+  </header>
+
+  <!-- Login -->
+  <section id="loginCliente" class="card">
+    <h2>Login</h2>
+    <input type="text" id="loginUsuario" placeholder="Usuário">
+    <input type="password" id="loginSenha" placeholder="Senha">
+    <button onclick="loginCliente()">Entrar</button>
+
+    <p>Não tem conta? Cadastre-se abaixo:</p>
+    <form id="formCadastro" onsubmit="event.preventDefault(); cadastrarCliente();">
+      <input type="text" id="usuario" placeholder="Usuário" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <input type="email" id="email" placeholder="E-mail">
+      <button type="submit">Cadastrar</button>
+    </form>
+  </section>
+
+  <!-- Painel Cliente -->
+  <section id="painelCliente" class="painel" style="display:none;">
+    <nav class="menu">
+      <ul>
+        <li><a href="#" onclick="mostrarAba('dashboard')">Dashboard</a></li>
+        <li><a href="#" onclick="mostrarAba('produtos')">Produtos</a></li>
+        <li><a href="#" onclick="mostrarAba('gestao')">Gestão</a></li>
+        <li><a href="#" onclick="mostrarAba('financeiro')">Financeiro</a></li>
+        <li><a href="#" onclick="mostrarAba('precificacao')">Precificação</a></li>
+        <li><a href="#" onclick="mostrarAba('dre')">DRE</a></li>
+        <li><a href="#" onclick="logoutCliente()">Sair</a></li>
+      </ul>
+    </nav>
+
+    <main class="conteudo">
+      <!-- Dashboard -->
+      <div id="dashboard" class="aba">
+        <h2 id="bemVindoCliente">Bem-vindo!</h2>
+        <p>Plano atual: <strong id="planoCliente"></strong></p>
+        <p>Vencimento: <strong id="vencimentoCliente"></strong></p>
+        <p>Dias restantes: <strong id="diasRestantesCliente"></strong></p>
+
+        <canvas id="graficoFinanceiro"></canvas>
+      </div>
+
+      <!-- Produtos -->
+      <div id="produtos" class="aba" style="display:none;">
+        <h2>Gestão de Produtos</h2>
+        <p>Aqui você pode cadastrar, editar e gerenciar produtos.</p>
+      </div>
+
+      <!-- Gestão -->
+      <div id="gestao" class="aba" style="display:none;">
+        <h2>Gestão Empresarial</h2>
+        <p>Ferramentas para controle de processos e eficiência do restaurante.</p>
+      </div>
+
+      <!-- Financeiro -->
+      <div id="financeiro" class="aba" style="display:none;">
+        <h2>Controle Financeiro</h2>
+        <p>Relatórios de entradas, saídas e fluxo de caixa.</p>
+      </div>
+
+      <!-- Precificação -->
+      <div id="precificacao" class="aba" style="display:none;">
+        <h2>Precificação de Produtos</h2>
+        <p>Defina valores de venda com base em custos e margem de lucro.</p>
+      </div>
+
+      <!-- DRE -->
+      <div id="dre" class="aba" style="display:none;">
+        <h2>Demonstração do Resultado do Exercício (DRE)</h2>
+        <p>Relatório contábil de desempenho financeiro.</p>
+      </div>
+    </main>
+  </section>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    function mostrarAba(id) {
+      document.querySelectorAll(".aba").forEach(el => el.style.display = "none");
+      document.getElementById(id).style.display = "block";
+    }
+
+    // Criar gráfico no dashboard
+    function carregarGraficoFinanceiro() {
+      const ctx = document.getElementById("graficoFinanceiro").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Janeiro", "Fevereiro", "Março", "Abril"],
+          datasets: [{
+            label: "Receita (R$)",
+            data: [5000, 7000, 6000, 8000],
+          }]
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarGraficoFinanceiro();
+    });
+  </script>
+</body>
+</html>
