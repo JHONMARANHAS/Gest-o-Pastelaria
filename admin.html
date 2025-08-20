@@ -3,42 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrativo</title>
+  <title>GourmetGestor - Painel Admin</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Login do Admin -->
-  <div id="admin-login" class="login-container">
-    <h2>Login do Administrador</h2>
-    <input type="password" id="admin-senha" placeholder="Senha do admin">
-    <button onclick="loginAdmin()">Entrar</button>
-  </div>
+  <div class="container">
+    <h1>🔐 Painel Administrativo</h1>
 
-  <!-- Painel Admin -->
-  <div id="admin-dashboard" class="hidden">
-    <header class="admin-header">
-      <h1>Painel Administrativo</h1>
+    <!-- Login Admin -->
+    <div id="admin-login" class="box">
+      <h2>Login Admin</h2>
+      <input type="text" id="admin-usuario" placeholder="Usuário Admin">
+      <input type="password" id="admin-senha" placeholder="Senha Admin">
+      <button onclick="loginAdmin()">Entrar</button>
+    </div>
+
+    <!-- Dashboard Admin -->
+    <div id="admin-dashboard" class="hidden">
+      <h2>Bem-vindo, Administrador!</h2>
+      <table border="1" width="100%">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Usuário</th>
+            <th>Dias Restantes</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="usuarios-tabela"></tbody>
+      </table>
+      <br>
       <button onclick="logoutAdmin()">Sair</button>
-    </header>
-
-    <main>
-      <section>
-        <h2>Usuários Cadastrados</h2>
-        <table class="tabela-usuarios">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Login</th>
-              <th>Dias Restantes</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="usuarios-tabela"></tbody>
-        </table>
-      </section>
-    </main>
+    </div>
   </div>
-
   <script src="admin.js"></script>
 </body>
 </html>
