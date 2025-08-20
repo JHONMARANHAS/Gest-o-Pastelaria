@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Login do Admin -->
+  <div id="admin-login" class="login-container">
+    <h2>Login do Administrador</h2>
+    <input type="password" id="admin-senha" placeholder="Senha do admin">
+    <button onclick="loginAdmin()">Entrar</button>
+  </div>
+
+  <!-- Painel Admin -->
+  <div id="admin-dashboard" class="hidden">
+    <header class="admin-header">
+      <h1>Painel Administrativo</h1>
+      <button onclick="logoutAdmin()">Sair</button>
+    </header>
+
+    <main>
+      <section>
+        <h2>Usuários Cadastrados</h2>
+        <table class="tabela-usuarios">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Login</th>
+              <th>Dias Restantes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="usuarios-tabela"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
