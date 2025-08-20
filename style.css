@@ -1,147 +1,78 @@
-/* Reset básico */
-* {
+body {
+  font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f9;
-  color: #333;
-  min-height: 100vh;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 20px;
+  justify-content: center;
+  height: 100vh;
 }
 
-/* Card genérico */
-.card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 420px;
+.container {
   text-align: center;
-  transition: transform 0.3s;
+  width: 100%;
+  max-width: 400px;
 }
 
-.card:hover {
-  transform: translateY(-4px);
+h1 {
+  font-size: 28px;
+  margin-bottom: 5px;
 }
 
-/* Títulos */
-h1, h2 {
+.subtitle {
+  font-size: 14px;
+  color: #ddd;
+  margin-bottom: 20px;
+}
+
+.box {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.box h2 {
   margin-bottom: 15px;
-  color: #222;
 }
 
-/* Inputs */
 input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   margin: 8px 0;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 8px;
-  font-size: 15px;
 }
 
-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 6px rgba(0,123,255,0.4);
-}
-
-/* Botões */
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 12px;
   border: none;
   border-radius: 8px;
-  background: #007bff;
-  color: #fff;
+  background: #ff9800;
+  color: white;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition: 0.3s;
 }
 
 button:hover {
-  background: #0056b3;
-  transform: translateY(-2px);
-}
-
-/* Tabs (login/cadastro) */
-.tabs {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.tabs button {
-  width: 48%;
-  background: #eee;
-  color: #333;
-}
-
-.tabs button.active {
-  background: #007bff;
-  color: #fff;
-}
-
-/* Forms */
-.form {
-  display: none;
-}
-
-.form.active {
-  display: block;
-}
-
-/* Dashboard */
-#dashboard {
-  width: 100%;
-  max-width: 1000px;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-header h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #007bff;
-}
-
-header button {
-  width: auto;
-  padding: 10px 18px;
-  background: #dc3545;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.card h2 {
-  margin-bottom: 12px;
-  color: #007bff;
-}
-
-/* Listas dentro do painel */
-#estoque-list, #vendas-list {
-  text-align: left;
-  margin-bottom: 10px;
+  background: #e68900;
 }
 
 .hidden {
   display: none;
+}
+
+.switch {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.switch a {
+  color: #ff9800;
+  text-decoration: none;
 }
