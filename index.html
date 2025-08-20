@@ -1,91 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SGP — Sistema de Gestão de Pastelaria</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GourmetGestor - Acesso</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Autenticação -->
-  <div id="login-container" class="card">
-    <h1>SGP — Sistema de Gestão</h1>
-    <p class="muted">Pastelaria • SaaS</p>
+  <div class="container">
+    <h1>🍽️ GourmetGestor</h1>
+    <p class="subtitle">Sistema de Gestão para Restaurantes</p>
 
-    <div class="tabs" style="margin-top:14px;">
-      <button class="active" onclick="toggleForm('login-form')">Entrar</button>
-      <button onclick="toggleForm('cad-form')">Cadastrar</button>
+    <!-- Login -->
+    <div id="login-box" class="box">
+      <h2>Login</h2>
+      <input type="text" id="login-usuario" placeholder="Usuário">
+      <input type="password" id="login-senha" placeholder="Senha">
+      <button onclick="loginUsuario()">Entrar</button>
+      <p class="switch">Não tem conta? <a href="#" onclick="mostrarCadastro()">Cadastre-se</a></p>
     </div>
 
-    <!-- Form Login -->
-    <div id="login-form" class="form active">
-      <input id="login-login" placeholder="Usuário (login)" />
-      <input id="login-senha" placeholder="Senha" type="password" />
-      <button onclick="login()">Entrar</button>
-      <div class="hint">
-        <small>Não tem conta? Vá em "Cadastrar" para criar seu acesso (7 dias grátis).</small>
-      </div>
+    <!-- Cadastro -->
+    <div id="cadastro-box" class="box hidden">
+      <h2>Cadastro</h2>
+      <input type="text" id="cadastro-nome" placeholder="Nome completo">
+      <input type="text" id="cadastro-usuario" placeholder="Usuário">
+      <input type="password" id="cadastro-senha" placeholder="Senha">
+      <button onclick="cadastrarUsuario()">Cadastrar</button>
+      <p class="switch">Já tem conta? <a href="#" onclick="mostrarLogin()">Login</a></p>
     </div>
 
-    <!-- Form Cadastro -->
-    <div id="cad-form" class="form">
-      <input id="cad-nome" placeholder="Seu nome" />
-      <input id="cad-login" placeholder="Escolha um usuário (login)" />
-      <input id="cad-senha" placeholder="Crie uma senha" type="password" />
-      <button onclick="cadastrar()">Cadastrar</button>
-      <div class="hint">
-        <small>Ao cadastrar, inicia um teste gratuito de 7 dias.</small>
-      </div>
+    <!-- Dashboard Usuário -->
+    <div id="dashboard" class="hidden">
+      <h2>Bem-vindo(a), <span id="usuario-nome"></span>!</h2>
+      <p id="dias-restantes"></p>
+      <button onclick="logoutUsuario()">Sair</button>
     </div>
   </div>
-
-  <!-- Dashboard do usuário -->
-  <div id="dashboard" class="hidden">
-    <header>
-      <h1>SGP — Painel do Usuário</h1>
-      <div class="userbox">
-        <span id="user-name">—</span>
-        <button class="danger" onclick="logout()">Sair</button>
-      </div>
-    </header>
-
-    <main id="dashboard" class="container">
-      <div class="grid">
-        <section class="card">
-          <h2>Estoque</h2>
-          <ul id="estoque-list" class="list"></ul>
-          <div class="row-inline">
-            <input id="novo-produto-nome" placeholder="Produto (ex: Massa)" />
-            <input id="novo-produto-qtd" type="number" placeholder="Qtd" />
-            <button class="secondary" onclick="adicionarProduto(
-              document.getElementById('novo-produto-nome').value,
-              parseFloat(document.getElementById('novo-produto-qtd').value||0)
-            )">Adicionar</button>
-          </div>
-        </section>
-
-        <section class="card">
-          <h2>Vendas</h2>
-          <ul id="vendas-list" class="list"></ul>
-          <div class="row-inline">
-            <input id="nova-venda-valor" type="number" step="0.01" placeholder="Valor R$" />
-            <button class="secondary" onclick="registrarVenda(
-              parseFloat(document.getElementById('nova-venda-valor').value||0)
-            )">Registrar venda</button>
-          </div>
-        </section>
-
-        <section class="card">
-          <h2>Relatório Rápido</h2>
-          <div id="relatorio-info" class="muted">—</div>
-          <div class="note">
-            <small>Dica: Para relatórios avançados, considere integrar um backend (ex.: Firebase).</small>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
   <script src="sgp.js"></script>
 </body>
 </html>
