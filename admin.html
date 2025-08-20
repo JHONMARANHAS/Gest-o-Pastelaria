@@ -3,132 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestor Restaurante Pro - Painel Admin</title>
+  <title>Admin - Gestor Restaurante</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- LOGIN -->
-  <div id="loginContainer" class="login-container">
+  <!-- Login do Admin -->
+  <div id="adminLogin" class="login-container">
     <h2>Painel Administrativo</h2>
-    <label for="username">Usuário</label>
-    <input type="text" id="username" placeholder="Digite seu usuário">
-    <label for="password">Senha</label>
-    <input type="password" id="password" placeholder="Digite sua senha">
+    <input type="text" id="adminUsuario" placeholder="Usuário" />
+    <input type="password" id="adminSenha" placeholder="Senha" />
     <button onclick="loginAdmin()">Entrar</button>
-    <p id="loginError" class="error"></p>
   </div>
 
-  <!-- PAINEL ADMIN -->
-  <div id="adminPanel">
-    <div class="admin-container">
-      <!-- MENU LATERAL -->
-      <aside class="sidebar">
-        <h2>Gestor Restaurante Pro</h2>
-        <nav>
-          <ul>
-            <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
-            <li><a href="#" onclick="showSection('usuarios')">Usuários</a></li>
-            <li><a href="#" onclick="showSection('planos')">Planos</a></li>
-            <li><a href="#" onclick="showSection('relatorios')">Relatórios</a></li>
-            <li><a href="#" onclick="showSection('config')">Configurações</a></li>
-          </ul>
-        </nav>
-        <button onclick="logout()">Sair</button>
-      </aside>
+  <!-- Painel do Admin -->
+  <div id="adminPanel" class="admin-container" style="display:none;">
+    <aside class="sidebar">
+      <h2>Gestor Restaurante</h2>
+      <nav>
+        <button onclick="showAdminSection('dashboard')">Dashboard</button>
+        <button onclick="showAdminSection('clientes')">Clientes</button>
+        <button onclick="showAdminSection('planos')">Planos de Acesso</button>
+        <button onclick="logoutAdmin()">Sair</button>
+      </nav>
+    </aside>
 
-      <!-- CONTEÚDO -->
-      <main class="content">
-        <!-- DASHBOARD -->
-        <section id="dashboardSection">
-          <h2>Dashboard</h2>
-          <div class="cards">
-            <div class="card">
-              <h3>Clientes</h3>
-              <p id="totalClientes">0</p>
-            </div>
-            <div class="card">
-              <h3>Ativos</h3>
-              <p id="clientesAtivos">0</p>
-            </div>
-            <div class="card">
-              <h3>Vencidos</h3>
-              <p id="clientesVencidos">0</p>
-            </div>
+    <main class="content">
+      <!-- Dashboard -->
+      <section id="dashboard" class="admin-section">
+        <h2>Dashboard</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Total Clientes</h3>
+            <p id="totalClientes">0</p>
           </div>
-          <canvas id="graficoClientes"></canvas>
-        </section>
+          <div class="card">
+            <h3>Ativos</h3>
+            <p id="clientesAtivos">0</p>
+          </div>
+          <div class="card">
+            <h3>Vencidos</h3>
+            <p id="clientesVencidos">0</p>
+          </div>
+        </div>
+        <canvas id="graficoClientes" width="400" height="200"></canvas>
+      </section>
 
-        <!-- USUÁRIOS -->
-        <section id="usuariosSection" class="hidden">
-          <h2>Gerenciar Usuários</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Usuário</th>
-                <th>Status</th>
-                <th>Dias Restantes</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaUsuarios"></tbody>
-          </table>
-        </section>
+      <!-- Clientes -->
+      <section id="clientes" class="admin-section" style="display:none;">
+        <h2>Gerenciar Clientes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Dias Restantes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaClientes"></tbody>
+        </table>
+      </section>
 
-        <!-- PLANOS -->
-        <section id="planosSection" class="hidden">
-          <h2>Gerenciar Planos</h2>
-          <form id="formPlano" onsubmit="criarPlano(event)">
-            <label for="planoNome">Nome do Plano</label>
-            <input type="text" id="planoNome" required>
-            
-            <label for="planoMeses">Duração (meses)</label>
-            <input type="number" id="planoMeses" min="1" required>
-            
-            <label for="planoValor">Valor (R$)</label>
-            <input type="number" id="planoValor" min="0" step="0.01" required>
-            
-            <div>
-              <p>Acessos Permitidos:</p>
-              <label><input type="checkbox" value="Dashboard"> Dashboard</label>
-              <label><input type="checkbox" value="Produtos"> Produtos</label>
-              <label><input type="checkbox" value="Gestão"> Gestão</label>
-              <label><input type="checkbox" value="Financeiro"> Financeiro</label>
-              <label><input type="checkbox" value="Precificação"> Precificação</label>
-              <label><input type="checkbox" value="DRE"> DRE</label>
-            </div>
-            
-            <button type="submit">Criar Plano</button>
-          </form>
+      <!-- Planos -->
+      <section id="planos" class="admin-section" style="display:none;">
+        <h2>Planos de Acesso</h2>
+        <form id="formPlano">
+          <input type="text" id="nomePlano" placeholder="Nome do Plano" required>
+          <input type="number" id="duracaoPlano" placeholder="Duração (em dias)" required>
+          <input type="number" id="valorPlano" placeholder="Valor (R$)" required>
+          <textarea id="acessosPlano" placeholder="Acessos permitidos (ex: Dashboard, Financeiro)" required></textarea>
+          <button type="button" onclick="criarPlano()">Criar Plano</button>
+        </form>
 
-          <h3>Planos Criados</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Meses</th>
-                <th>Valor</th>
-                <th>Acessos</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaPlanos"></tbody>
-          </table>
-        </section>
-
-        <!-- RELATÓRIOS -->
-        <section id="relatoriosSection" class="hidden">
-          <h2>Relatórios</h2>
-          <p>Em breve relatórios detalhados de uso e faturamento.</p>
-        </section>
-
-        <!-- CONFIGURAÇÕES -->
-        <section id="configSection" class="hidden">
-          <h2>Configurações</h2>
-          <p>Aqui você poderá personalizar seu sistema futuramente.</p>
-        </section>
-      </main>
-    </div>
+        <h3>Planos Existentes</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Duração</th>
+              <th>Valor</th>
+              <th>Acessos</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaPlanos"></tbody>
+        </table>
+      </section>
+    </main>
   </div>
 
   <script src="admin.js"></script>
