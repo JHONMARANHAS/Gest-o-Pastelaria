@@ -1,37 +1,238 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FoodManager - Painel Administrativo</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FoodManager — Painel Administrativo</title>
+
+  <!-- Estilos globais existentes -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Estilos específicos do Admin (sem alterar outros arquivos) -->
+  <style>
+    :root{
+      --adm-bg:#0b1220;--adm-card:#111827;--adm-line:#1f2937;--adm-text:#e5e7eb;--adm-muted:#9ca3af;--adm-pri:#22c55e;--adm-pri-2:#16a34a;--adm-warn:#f59e0b;--adm-err:#ef4444;--adm-rad:16px;--adm-shadow:0 12px 30px rgba(0,0,0,.35)
+    }
+    body.admin {
+      background: linear-gradient(180deg,#08101e,var(--adm-bg));
+      color: var(--adm-text);
+    }
+    .adm-header {
+      position: sticky; top: 0; z-index: 20;
+      display:flex; align-items:center; gap:16px;
+      padding:16px 20px; background:rgba(17,24,39,.65);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(148,163,184,.12);
+    }
+    .adm-header .brand { display:flex; align-items:center; gap:10px; font-weight:700; }
+    .adm-header .tag { font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(34,197,94,.15); color:#86efac }
+    .adm-header .right { margin-left:auto; display:flex; gap:10px; align-items:center }
+    .adm-btn {
+      padding:10px 12px; border-radius:10px; border:1px solid rgba(148,163,184,.22);
+      background:#0b1220; color:var(--adm-text); cursor:pointer
+    }
+    .adm-btn.primary { background:var(--adm-pri); border-color:var(--adm-pri-2); color:#052e16; font-weight:700 }
+    .adm-btn.warn { border-color:rgba(245,158,11,.45); color:#fbbf24 }
+    .adm-btn.err { border-color:rgba(239,68,68,.45); color:#fecaca }
+    .adm-container { max-width:1200px; margin:24px auto; padding:0 16px }
+    .adm-grid { display:grid; gap:16px }
+    .adm-cols-4 { grid-template-columns:repeat(4,minmax(0,1fr)) }
+    .adm-cols-2 { grid-template-columns:repeat(2,minmax(0,1fr)) }
+    .adm-card {
+      background:var(--adm-card); border:1px solid rgba(148,163,184,.15);
+      border-radius:var(--adm-rad); box-shadow:var(--adm-shadow); padding:18px
+    }
+    .adm-card h3 { margin:0 0 10px; font-size:16px }
+    .adm-muted { color:var(--adm-muted); font-size:12px }
+    .adm-kpi { display:flex; align-items:center; justify-content:space-between }
+    .adm-kpi strong { font-size:22px }
+    .adm-chip{ padding:2px 8px; border-radius:999px; background:rgba(148,163,184,.15); font-size:12px }
+    .adm-chip.ok{ background:rgba(16,185,129,.18); color:#86efac }
+    .adm-chip.warn{ background:rgba(245,158,11,.18); color:#fbbf24 }
+    .adm-chip.err{ background:rgba(239,68,68,.18); color:#fecaca }
+
+    /* Tabela */
+    table.adm-table{ width:100%; border-collapse:collapse; font-size:14px }
+    .adm-table th, .adm-table td { padding:10px 8px; border-bottom:1px solid rgba(148,163,184,.12) }
+    .adm-table th { text-align:left; color:#cbd5e1; background:rgba(148,163,184,.06) }
+    .adm-table tr:hover td{ background:rgba(148,163,184,.05) }
+
+    .adm-actions { display:flex; gap:8px; flex-wrap:wrap }
+    .adm-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:10px }
+    .adm-filters > * { flex: 1 1 180px }
+    .adm-input, .adm-select {
+      width:100%; background:#0b1220; color:var(--adm-text);
+      border:1px solid rgba(148,163,184,.22); border-radius:10px; padding:10px 12px; outline:none
+    }
+    .adm-input:focus, .adm-select:focus { border-color:var(--adm-pri) }
+
+    /* Login caixinha reutilizando style.css base */
+    .login-card {
+      width:min(420px,92vw); margin:80px auto; background:var(--adm-card);
+      border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:22px; box-shadow:var(--adm-shadow)
+    }
+    .hidden{ display:none }
+
+    /* Modal */
+    .adm-modal { position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); z-index:30 }
+    .adm-panel { width:min(680px,92vw); background:var(--adm-card); border:1px solid rgba(148,163,184,.2); border-radius:16px; box-shadow:var(--adm-shadow); padding:16px }
+    .adm-row { display:flex; gap:10px }
+    .adm-row > * { flex:1 }
+    .adm-footer { margin-top:10px; display:flex; justify-content:flex-end; gap:8px }
+  </style>
 </head>
-<body>
-  <!-- Tela de Login do Admin -->
-  <div id="admin-login" class="login-container">
-    <h2>Login do Administrador</h2>
-    <input type="text" id="admin-login-user" placeholder="Usuário">
-    <input type="password" id="admin-login-pass" placeholder="Senha">
-    <button onclick="loginAdmin()">Entrar</button>
+<body class="admin">
+
+  <!-- Login do Administrador -->
+  <div id="admin-login" class="login-card">
+    <h2 style="margin-top:0">Acesso do Administrador</h2>
+    <p class="adm-muted" style="margin:6px 0 14px">Entre com suas credenciais para gerenciar clientes, acessos e configurações.</p>
+    <input type="text" class="adm-input" id="admin-login-user" placeholder="Usuário (ex.: jhonmaranhas)" />
+    <input type="password" class="adm-input" id="admin-login-pass" placeholder="Senha" />
+    <div class="adm-footer">
+      <button class="adm-btn" onclick="limparCamposLogin()">Limpar</button>
+      <button class="adm-btn primary" onclick="loginAdmin()">Entrar</button>
+    </div>
   </div>
 
-  <!-- Painel Admin -->
-  <div id="admin-dashboard" class="hidden dashboard">
-    <h1>Painel Administrativo - FoodManager</h1>
-    <button onclick="logoutAdmin()">Sair</button>
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Login</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="usuarios-tabela"></tbody>
-    </table>
+  <!-- Painel Administrativo -->
+  <div id="admin-dashboard" class="hidden">
+    <header class="adm-header">
+      <div class="brand">🍽️ <span>FoodManager</span> <span class="tag">Painel Administrativo</span></div>
+      <div class="right">
+        <button class="adm-btn" onclick="exportarUsuarios()">Backup (.json)</button>
+        <label class="adm-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px">
+          Importar <input type="file" id="file-import" accept="application/json" style="display:none" onchange="importarUsuarios(event)" />
+        </label>
+        <button class="adm-btn" onclick="abrirNovoCliente()">+ Novo cliente</button>
+        <button class="adm-btn err" onclick="logoutAdmin()">Sair</button>
+      </div>
+    </header>
+
+    <div class="adm-container">
+      <!-- KPIs -->
+      <section class="adm-grid adm-cols-4">
+        <div class="adm-card adm-kpi">
+          <div><div class="adm-muted">Clientes totais</div><strong id="kpi-total">0</strong></div>
+          <span class="adm-chip">todos</span>
+        </div>
+        <div class="adm-card adm-kpi">
+          <div><div class="adm-muted">Ativos</div><strong id="kpi-ativos">0</strong></div>
+          <span class="adm-chip ok" id="kpi-ativos-pct">0%</span>
+        </div>
+        <div class="adm-card adm-kpi">
+          <div><div class="adm-muted">Vencidos</div><strong id="kpi-vencidos">0</strong></div>
+          <span class="adm-chip err" id="kpi-vencidos-pct">0%</span>
+        </div>
+        <div class="adm-card adm-kpi">
+          <div><div class="adm-muted">Dias restantes (média)</div><strong id="kpi-media">0</strong></div>
+          <span class="adm-chip warn" id="kpi-novos7">0 novos/7d</span>
+        </div>
+      </section>
+
+      <!-- Gráficos -->
+      <section class="adm-grid adm-cols-2" style="margin-top:16px">
+        <div class="adm-card">
+          <h3>Status dos clientes</h3>
+          <canvas id="chStatus" height="130"></canvas>
+        </div>
+        <div class="adm-card">
+          <h3>Cadastros — últimos 30 dias</h3>
+          <canvas id="chCadastros" height="130"></canvas>
+        </div>
+      </section>
+
+      <!-- Filtros -->
+      <section class="adm-card" style="margin-top:16px">
+        <h3>Clientes</h3>
+        <div class="adm-filters">
+          <div>
+            <label class="adm-muted">Busca</label>
+            <input id="flt-busca" class="adm-input" placeholder="Nome ou usuário..." oninput="renderTabela()" />
+          </div>
+          <div>
+            <label class="adm-muted">Status</label>
+            <select id="flt-status" class="adm-select" onchange="renderTabela()">
+              <option value="todos">Todos</option>
+              <option value="ativos">Ativos</option>
+              <option value="vencidos">Vencidos</option>
+            </select>
+          </div>
+          <div>
+            <label class="adm-muted">Ordenar por</label>
+            <select id="flt-ord" class="adm-select" onchange="renderTabela()">
+              <option value="nome">Nome</option>
+              <option value="usuario">Usuário</option>
+              <option value="dias">Dias restantes</option>
+              <option value="data">Data de cadastro</option>
+            </select>
+          </div>
+          <div>
+            <label class="adm-muted">Direção</label>
+            <select id="flt-dir" class="adm-select" onchange="renderTabela()">
+              <option value="asc">Ascendente</option>
+              <option value="desc">Descendente</option>
+            </select>
+          </div>
+        </div>
+
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Usuário</th>
+              <th>Data cadastro</th>
+              <th>Dias restantes</th>
+              <th>Status</th>
+              <th style="width:300px">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tb-usuarios"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal Novo/Editar Cliente -->
+  <div id="modal-edit" class="adm-modal">
+    <div class="adm-panel">
+      <h3 id="edit-title">Editar cliente</h3>
+      <div class="adm-row">
+        <div>
+          <label class="adm-muted">Nome</label>
+          <input id="ed-nome" class="adm-input" />
+        </div>
+        <div>
+          <label class="adm-muted">Usuário (login)</label>
+          <input id="ed-login" class="adm-input" />
+        </div>
+      </div>
+      <div class="adm-row" style="margin-top:8px">
+        <div>
+          <label class="adm-muted">Senha</label>
+          <input id="ed-senha" class="adm-input" type="text" />
+        </div>
+        <div>
+          <label class="adm-muted">Data de cadastro</label>
+          <input id="ed-data" class="adm-input" type="date" />
+        </div>
+      </div>
+      <div class="adm-footer">
+        <button class="adm-btn err" id="ed-excluir" onclick="excluirAtual()">Excluir</button>
+        <button class="adm-btn warn" onclick="renovarAtual(7)">+7 dias</button>
+        <button class="adm-btn" onclick="fecharModal()">Cancelar</button>
+        <button class="adm-btn primary" onclick="salvarAtual()">Salvar</button>
+      </div>
+    </div>
   </div>
 
   <script src="admin.js"></script>
+  <script>
+    // melhora visual no body sem afetar outras páginas
+    document.body.classList.add('admin');
+  </script>
 </body>
 </html>
