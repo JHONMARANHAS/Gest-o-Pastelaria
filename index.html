@@ -2,139 +2,121 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Sistema de Gestão - Pastelaria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestão Pastelaria</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- ===== LOGIN ===== -->
-  <div id="login">
-    <h2>🔑 Login</h2>
-    <input id="login-usuario" placeholder="Usuário"><br>
-    <input id="login-senha" type="password" placeholder="Senha"><br>
-    <button onclick="login()">Entrar</button>
-  </div>
-
-  <!-- ===== APP ===== -->
-  <div id="app" style="display:none;">
-    <header>
-      <h1>🥟 Sistema de Gestão - Pastelaria</h1>
-      <button onclick="logout()">Sair</button>
-    </header>
-
+  <header>
+    <h1>🍴 Sistema de Gestão - Pastelaria</h1>
     <nav>
-      <button onclick="show('dashboard')">Dashboard</button>
-      <button onclick="show('estoque')">Estoque</button>
-      <button onclick="show('ingredientes')">Ingredientes</button>
-      <button onclick="show('receitas')">Receitas</button>
-      <button onclick="show('compras')">Compras</button>
-      <button onclick="show('vendas')">Vendas</button>
-      <button onclick="show('caixa')">Caixa</button>
-      <button onclick="show('usuarios')">Usuários</button>
-      <button onclick="show('relatorios')">Relatórios</button>
+      <button onclick="mostrarSecao('sec-dashboard')">📊 Dashboard</button>
+      <button onclick="mostrarSecao('sec-vendas')">💰 Vendas</button>
+      <button onclick="mostrarSecao('sec-estoque')">📦 Estoque</button>
+      <button onclick="mostrarSecao('sec-receitas')">🧾 Receitas</button>
+      <button onclick="mostrarSecao('sec-financas')">💵 Finanças</button>
+      <button onclick="mostrarSecao('sec-usuarios')">👥 Usuários</button>
     </nav>
+  </header>
 
-    <!-- ===== SEÇÕES ===== -->
+  <main>
+    <!-- DASHBOARD -->
     <section id="sec-dashboard" class="sec">
-  <h2>📊 Dashboard</h2>
-  
-  <div class="dashboard-grid">
-    <div class="card">
-      <div class="card-icon">💰</div>
-      <div class="card-info">
-        <h3 id="dash-vendas-hoje">R$ 0,00</h3>
-        <p>Vendas do Dia</p>
+      <h2>📊 Dashboard</h2>
+      
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <div class="card-info">
+            <h3 id="dash-vendas-hoje">R$ 0,00</h3>
+            <p>Vendas do Dia</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <div class="card-info">
+            <h3 id="dash-estoque-baixo">0</h3>
+            <p>Itens em Estoque Baixo</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧾</div>
+          <div class="card-info">
+            <h3 id="dash-receitas">0</h3>
+            <p>Receitas Cadastradas</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">👥</div>
+          <div class="card-info">
+            <h3 id="dash-usuarios">0</h3>
+            <p>Usuários Ativos</p>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-icon">📦</div>
-      <div class="card-info">
-        <h3 id="dash-estoque-baixo">0</h3>
-        <p>Itens em Estoque Baixo</p>
+      <div class="dashboard-alertas">
+        <h3>⚠️ Alertas</h3>
+        <ul id="lista-alertas"></ul>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-icon">🧾</div>
-      <div class="card-info">
-        <h3 id="dash-receitas">0</h3>
-        <p>Receitas Cadastradas</p>
+      <!-- Gráficos -->
+      <div class="dashboard-charts">
+        <div class="chart-box">
+          <h3>📈 Vendas da Semana</h3>
+          <canvas id="chart-vendas-semana"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>💵 Fluxo de Caixa (últimos 7 dias)</h3>
+          <canvas id="chart-caixa"></canvas>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="card-icon">👥</div>
-      <div class="card-info">
-        <h3 id="dash-usuarios">0</h3>
-        <p>Usuários Ativos</p>
-      </div>
-    </div>
-  </div>
+    <!-- VENDAS -->
+    <section id="sec-vendas" class="sec hidden">
+      <h2>💰 Vendas</h2>
+      <button onclick="registrarVenda()">Registrar Venda</button>
+      <ul id="lista-vendas"></ul>
+    </section>
 
-  <div class="dashboard-alertas">
-    <h3>⚠️ Alertas</h3>
-    <ul id="lista-alertas"></ul>
-  </div>
-
-  <!-- Gráficos -->
-  <div class="dashboard-charts">
-    <div class="chart-box">
-      <h3>📈 Vendas da Semana</h3>
-      <canvas id="chart-vendas-semana"></canvas>
-    </div>
-    <div class="chart-box">
-      <h3>💵 Fluxo de Caixa (últimos 7 dias)</h3>
-      <canvas id="chart-caixa"></canvas>
-    </div>
-  </div>
-</section>
-
-<!-- Importando Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <section id="sec-estoque" class="sec" style="display:none;">
+    <!-- ESTOQUE -->
+    <section id="sec-estoque" class="sec hidden">
       <h2>📦 Estoque</h2>
-      <table id="tbl-estoque"></table>
+      <input id="novoItem" placeholder="Nome do item">
+      <input id="qtdItem" type="number" placeholder="Quantidade">
+      <button onclick="adicionarItem()">Adicionar</button>
+      <ul id="lista-estoque"></ul>
     </section>
 
-    <section id="sec-ingredientes" class="sec" style="display:none;">
-      <h2>🌿 Ingredientes</h2>
-      <div id="tbl-ingredientes"></div>
+    <!-- RECEITAS -->
+    <section id="sec-receitas" class="sec hidden">
+      <h2>🧾 Receitas</h2>
+      <input id="novaReceita" placeholder="Nome da receita">
+      <button onclick="adicionarReceita()">Adicionar</button>
+      <ul id="lista-receitas"></ul>
     </section>
 
-    <section id="sec-receitas" class="sec" style="display:none;">
-      <h2>📋 Receitas</h2>
-      <div id="tbl-receitas"></div>
+    <!-- FINANÇAS -->
+    <section id="sec-financas" class="sec hidden">
+      <h2>💵 Finanças</h2>
+      <ul id="lista-financas"></ul>
     </section>
 
-    <section id="sec-compras" class="sec" style="display:none;">
-      <h2>🛒 Compras</h2>
-      <div id="tbl-compras"></div>
-    </section>
-
-    <section id="sec-vendas" class="sec" style="display:none;">
-      <h2>💵 Vendas</h2>
-      <div id="tbl-vendas"></div>
-    </section>
-
-    <section id="sec-caixa" class="sec" style="display:none;">
-      <h2>💰 Caixa</h2>
-      <div id="res-caixa"></div>
-    </section>
-
-    <section id="sec-usuarios" class="sec" style="display:none;">
+    <!-- USUÁRIOS -->
+    <section id="sec-usuarios" class="sec hidden">
       <h2>👥 Usuários</h2>
-      <div id="tbl-usuarios"></div>
+      <input id="novoUsuario" placeholder="Usuário">
+      <input id="novaSenha" type="password" placeholder="Senha">
+      <button onclick="adicionarUsuario()">Cadastrar</button>
+      <ul id="lista-usuarios"></ul>
     </section>
+  </main>
 
-    <section id="sec-relatorios" class="sec" style="display:none;">
-      <h2>📑 Relatórios</h2>
-      <div id="res-relatorios"></div>
-    </section>
-
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="sgp.js"></script>
 </body>
 </html>
