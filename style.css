@@ -1,0 +1,94 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #121212;
+  color: #eee;
+}
+
+h1, h2 {
+  color: #f5ba42;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f1f1f;
+  padding: 10px 20px;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
+  background: #1f1f1f;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+
+nav button {
+  background: #2c2c2c;
+  border: none;
+  color: #eee;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+nav button:hover {
+  background: #444;
+}
+
+.sec {
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table, th, td {
+  border: 1px solid #444;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+#login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+}
+#login input {
+  margin: 5px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1e1e1e;
+  color: #eee;
+}
+#login button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #f5ba42;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#login button:hover {
+  background: #ffcd58;
+}
+
+.chip {
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fff;
+}
+.ok { background: #28a745; }
+.warn { background: #ffc107; color: #000; }
+.err { background: #dc3545; }
