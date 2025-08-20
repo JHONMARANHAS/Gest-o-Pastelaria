@@ -36,9 +36,62 @@
 
     <!-- ===== SEÇÕES ===== -->
     <section id="sec-dashboard" class="sec">
-      <h2>📊 Dashboard</h2>
-      <div id="res-dashboard"></div>
-    </section>
+  <h2>📊 Dashboard</h2>
+  
+  <div class="dashboard-grid">
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <div class="card-info">
+        <h3 id="dash-vendas-hoje">R$ 0,00</h3>
+        <p>Vendas do Dia</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <div class="card-info">
+        <h3 id="dash-estoque-baixo">0</h3>
+        <p>Itens em Estoque Baixo</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🧾</div>
+      <div class="card-info">
+        <h3 id="dash-receitas">0</h3>
+        <p>Receitas Cadastradas</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <div class="card-info">
+        <h3 id="dash-usuarios">0</h3>
+        <p>Usuários Ativos</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-alertas">
+    <h3>⚠️ Alertas</h3>
+    <ul id="lista-alertas"></ul>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="dashboard-charts">
+    <div class="chart-box">
+      <h3>📈 Vendas da Semana</h3>
+      <canvas id="chart-vendas-semana"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>💵 Fluxo de Caixa (últimos 7 dias)</h3>
+      <canvas id="chart-caixa"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Importando Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <section id="sec-estoque" class="sec" style="display:none;">
       <h2>📦 Estoque</h2>
