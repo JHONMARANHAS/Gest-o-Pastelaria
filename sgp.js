@@ -1,150 +1,89 @@
-// --- LOGIN ---
-const adminUser = "jhonmaranhas";
-const adminPass = "J61772165360j";
+// ----------------------
+// Controle de abas Login/Cadastro
+// ----------------------
+function showTab(tab) {
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
 
-const loginForm = document.getElementById("loginForm");
-const loginError = document.getElementById("loginError");
-const loginScreen = document.getElementById("loginScreen");
-const adminPanel = document.getElementById("adminPanel");
+  document.querySelector(`.tab-button[onclick="showTab('${tab}')"]`).classList.add('active');
+  document.getElementById(tab).classList.add('active');
+}
 
-loginForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+// ----------------------
+// Cadastro de usuários
+// ----------------------
+function cadastrar() {
+  const usuario = document.getElementById("cadastroUsuario").value;
+  const email = document.getElementById("cadastroEmail").value;
+  const senha = document.getElementById("cadastroSenha").value;
 
-  if (username === adminUser && password === adminPass) {
-    loginScreen.style.display = "none";
-    adminPanel.style.display = "block";
-    carregarDashboard();
-    renderClientes();
-    renderPlanos();
-  } else {
-    loginError.style.display = "block";
+  if (!usuario || !email || !senha) {
+    alert("Preencha todos os campos!");
+    return;
   }
-});
 
+  let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+  if (usuarios.find(u => u.usuario === usuario)) {
+    alert("Usuário já existe!");
+    return;
+  }
+
+  const dataCadastro = new Date().getTime();
+
+  usuarios.push({
+    usuario,
+    email,
+    senha,
+    dataCadastro,
+    ativo: true,
+    plano: "Teste 7 dias"
+  });
+
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+  alert("Cadastro realizado com sucesso! Faça login.");
+  showTab('login');
+}
+
+// ----------------------
+// Login de usuários
+// ----------------------
+function login() {
+  const usuario = document.getElementById("loginUsuario").value;
+  const senha = document.getElementById("loginSenha").value;
+
+  let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  const user = usuarios.find(u => u.usuario === usuario && u.senha === senha);
+
+  if (!user) {
+    alert("Usuário ou senha incorretos!");
+    return;
+  }
+
+  // Verificação do teste grátis de 7 dias
+  const agora = new Date().getTime();
+  const diferenca = Math.floor((agora - user.dataCadastro) / (1000 * 60 * 60 * 24));
+
+  if (diferenca > 7 && user.plano === "Teste 7 dias") {
+    alert("Seu período de teste expirou! Entre em contato com o administrador.");
+    user.ativo = false;
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    return;
+  }
+
+  if (!user.ativo) {
+    alert("Usuário inativo. Contate o administrador.");
+    return;
+  }
+
+  localStorage.setItem("usuarioLogado", JSON.stringify(user));
+  window.location.href = "painel_cliente.html"; // Painel do cliente
+}
+
+// ----------------------
+// Logout
+// ----------------------
 function logout() {
-  adminPanel.style.display = "none";
-  loginScreen.style.display = "block";
-}
-
-// --- NAVEGAÇÃO ---
-function showSection(id) {
-  document.querySelectorAll(".content section").forEach(sec => sec.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
-
-// --- CLIENTES ---
-let clientes = JSON.parse(localStorage.getItem("clientes")) || [
-  { nome: "Carlos Silva", email: "carlos@email.com", status: "Ativo", dias: 15 },
-  { nome: "Maria Souza", email: "maria@email.com", status: "Vencido", dias: 0 }
-];
-
-function salvarClientes() {
-  localStorage.setItem("clientes", JSON.stringify(clientes));
-  carregarDashboard();
-  renderClientes();
-}
-
-// Renderizar tabela de clientes
-function renderClientes() {
-  const tbody = document.querySelector("#clientesTable tbody");
-  tbody.innerHTML = "";
-  clientes.forEach((c, i) => {
-    let row = `<tr>
-      <td>${c.nome}</td>
-      <td>${c.email}</td>
-      <td>${c.status}</td>
-      <td>${c.dias}</td>
-      <td>
-        <button onclick="renovarCliente(${i})">Renovar</button>
-        <button onclick="excluirCliente(${i})">Excluir</button>
-      </td>
-    </tr>`;
-    tbody.innerHTML += row;
-  });
-}
-
-function renovarCliente(i) {
-  let meses = prompt("Quantos meses deseja renovar?");
-  if (meses && !isNaN(meses)) {
-    clientes[i].status = "Ativo";
-    clientes[i].dias = parseInt(meses) * 30;
-    salvarClientes();
-  }
-}
-
-function excluirCliente(i) {
-  if (confirm("Deseja realmente excluir este cliente?")) {
-    clientes.splice(i, 1);
-    salvarClientes();
-  }
-}
-
-// --- PLANOS ---
-let planos = JSON.parse(localStorage.getItem("planos")) || [];
-
-function salvarPlanos() {
-  localStorage.setItem("planos", JSON.stringify(planos));
-  renderPlanos();
-}
-
-document.getElementById("planoForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  let nome = document.getElementById("planoNome").value;
-  let meses = document.getElementById("planoMeses").value;
-  let valor = document.getElementById("planoValor").value;
-
-  let acessos = [];
-  if (document.getElementById("acessoDashboard").checked) acessos.push("Dashboard");
-  if (document.getElementById("acessoProdutos").checked) acessos.push("Produtos");
-  if (document.getElementById("acessoFinanceiro").checked) acessos.push("Financeiro");
-  if (document.getElementById("acessoDRE").checked) acessos.push("DRE");
-
-  planos.push({ nome, meses, valor, acessos });
-  salvarPlanos();
-  this.reset();
-});
-
-function renderPlanos() {
-  const tbody = document.querySelector("#planosTable tbody");
-  tbody.innerHTML = "";
-  planos.forEach((p, i) => {
-    let row = `<tr>
-      <td>${p.nome}</td>
-      <td>${p.meses}</td>
-      <td>R$ ${p.valor}</td>
-      <td>${p.acessos.join(", ")}</td>
-      <td><button onclick="excluirPlano(${i})">Excluir</button></td>
-    </tr>`;
-    tbody.innerHTML += row;
-  });
-}
-
-function excluirPlano(i) {
-  if (confirm("Deseja excluir este plano?")) {
-    planos.splice(i, 1);
-    salvarPlanos();
-  }
-}
-
-// --- DASHBOARD ---
-function carregarDashboard() {
-  document.getElementById("totalClientes").innerText = clientes.length;
-  document.getElementById("ativosClientes").innerText = clientes.filter(c => c.status === "Ativo").length;
-  document.getElementById("vencidosClientes").innerText = clientes.filter(c => c.status === "Vencido").length;
-
-  const ctx = document.getElementById("graficoClientes").getContext("2d");
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Ativos", "Vencidos"],
-      datasets: [{
-        data: [
-          clientes.filter(c => c.status === "Ativo").length,
-          clientes.filter(c => c.status === "Vencido").length
-        ]
-      }]
-    }
-  });
+  localStorage.removeItem("usuarioLogado");
+  window.location.href = "index.html";
 }
