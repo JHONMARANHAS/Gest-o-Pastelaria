@@ -1,84 +1,147 @@
-/* ===== RESET ===== */
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #121212;
-  color: #eee;
-}
-h1, h2, h3 { margin: 10px 0; }
-button {
-  background: #4cafef;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-}
-button:hover { background: #369fdb; }
-
-/* ===== HEADER ===== */
-header {
-  background: #1e1e2f;
-  padding: 15px;
-  text-align: center;
-}
-header h1 { color: #4cafef; }
-nav { margin-top: 10px; }
-nav button { margin: 5px; }
-
-/* ===== SECTIONS ===== */
-.sec { padding: 20px; }
-.hidden { display: none; }
-
-/* ===== DASHBOARD ===== */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin: 20px 0;
-}
-.card {
-  background: #1e1e2f;
-  padding: 15px;
-  border-radius: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f9;
+  color: #333;
+  min-height: 100vh;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.card-icon {
-  font-size: 2rem;
-}
-.card-info h3 {
-  margin: 0;
-  color: #4cafef;
-}
-.dashboard-alertas {
-  margin-top: 20px;
-  background: #2a2a3d;
-  padding: 15px;
-  border-radius: 10px;
-}
-.dashboard-alertas h3 {
-  margin: 0 0 10px 0;
-  color: #ffcc00;
+  padding: 20px;
 }
 
-/* ===== GRÁFICOS ===== */
-.dashboard-charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
-  margin-top: 25px;
-}
-.chart-box {
-  background: #1e1e2f;
-  padding: 20px;
+/* Card genérico */
+.card {
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  padding: 25px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  transition: transform 0.3s;
 }
-.chart-box h3 {
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Títulos */
+h1, h2 {
+  margin-bottom: 15px;
+  color: #222;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(0,123,255,0.4);
+}
+
+/* Botões */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Tabs (login/cadastro) */
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.tabs button {
+  width: 48%;
+  background: #eee;
+  color: #333;
+}
+
+.tabs button.active {
+  background: #007bff;
+  color: #fff;
+}
+
+/* Forms */
+.form {
+  display: none;
+}
+
+.form.active {
+  display: block;
+}
+
+/* Dashboard */
+#dashboard {
+  width: 100%;
+  max-width: 1000px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #007bff;
+}
+
+header button {
+  width: auto;
+  padding: 10px 18px;
+  background: #dc3545;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card h2 {
+  margin-bottom: 12px;
+  color: #007bff;
+}
+
+/* Listas dentro do painel */
+#estoque-list, #vendas-list {
+  text-align: left;
   margin-bottom: 10px;
-  color: #4cafef;
-  font-size: 1.1rem;
+}
+
+.hidden {
+  display: none;
 }
