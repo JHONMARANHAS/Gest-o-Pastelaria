@@ -12,14 +12,16 @@
     <h1>Restaurante Manager - Área do Cliente</h1>
   </header>
 
-  <!-- Login -->
-  <section id="loginCliente" class="card">
+  <!-- Login / Cadastro -->
+  <section id="loginCliente" class="card auth">
     <h2>Login</h2>
     <input type="text" id="loginUsuario" placeholder="Usuário">
     <input type="password" id="loginSenha" placeholder="Senha">
     <button onclick="loginCliente()">Entrar</button>
 
-    <p>Não tem conta? Cadastre-se abaixo:</p>
+    <hr style="margin:16px 0;opacity:.25">
+
+    <h3>Cadastre-se (7 dias grátis)</h3>
     <form id="formCadastro" onsubmit="event.preventDefault(); cadastrarCliente();">
       <input type="text" id="usuario" placeholder="Usuário" required>
       <input type="password" id="senha" placeholder="Senha" required>
@@ -31,7 +33,7 @@
   <!-- Painel Cliente -->
   <section id="painelCliente" class="painel" style="display:none;">
     <nav class="menu">
-      <ul>
+      <ul id="menuCliente">
         <li><a href="#" onclick="mostrarAba('dashboard')">Dashboard</a></li>
         <li><a href="#" onclick="mostrarAba('produtos')">Produtos</a></li>
         <li><a href="#" onclick="mostrarAba('gestao')">Gestão</a></li>
@@ -49,14 +51,13 @@
         <p>Plano atual: <strong id="planoCliente"></strong></p>
         <p>Vencimento: <strong id="vencimentoCliente"></strong></p>
         <p>Dias restantes: <strong id="diasRestantesCliente"></strong></p>
-
         <canvas id="graficoFinanceiro"></canvas>
       </div>
 
       <!-- Produtos -->
       <div id="produtos" class="aba" style="display:none;">
         <h2>Gestão de Produtos</h2>
-        <p>Aqui você pode cadastrar, editar e gerenciar produtos.</p>
+        <p>Aqui você poderá cadastrar, editar e gerenciar produtos (de acordo com seu plano).</p>
       </div>
 
       <!-- Gestão -->
@@ -85,32 +86,25 @@
     </main>
   </section>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     function mostrarAba(id) {
       document.querySelectorAll(".aba").forEach(el => el.style.display = "none");
       document.getElementById(id).style.display = "block";
     }
-
-    // Criar gráfico no dashboard
     function carregarGraficoFinanceiro() {
-      const ctx = document.getElementById("graficoFinanceiro").getContext("2d");
+      const el = document.getElementById("graficoFinanceiro");
+      if(!el) return;
+      const ctx = el.getContext("2d");
       new Chart(ctx, {
         type: "bar",
         data: {
-          labels: ["Janeiro", "Fevereiro", "Março", "Abril"],
-          datasets: [{
-            label: "Receita (R$)",
-            data: [5000, 7000, 6000, 8000],
-          }]
+          labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
+          datasets: [{ label: "Receita (R$)", data: [5000, 7000, 6000, 8000, 9000, 8500] }]
         }
       });
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      carregarGraficoFinanceiro();
-    });
+    document.addEventListener("DOMContentLoaded", carregarGraficoFinanceiro);
   </script>
 </body>
 </html>
