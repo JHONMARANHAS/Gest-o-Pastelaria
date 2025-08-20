@@ -1,168 +1,105 @@
-// =============================
-// VARIÁVEIS GLOBAIS
-// =============================
-let usuarioLogado = null;
-
-// =============================
-// TABS LOGIN / CADASTRO
-// =============================
-function toggleForm(form) {
-  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
-  document.getElementById(form).classList.add('active');
-
-  document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.tabs button[onclick="toggleForm('${form}')"]`).classList.add('active');
+// Mostrar cadastro
+function mostrarCadastro() {
+  document.getElementById("login-box").classList.add("hidden");
+  document.getElementById("cadastro-box").classList.remove("hidden");
 }
 
-// =============================
-// CADASTRO DE NOVO USUÁRIO
-// =============================
-function cadastrar() {
-  const nome = document.getElementById('cad-nome').value.trim();
-  const login = document.getElementById('cad-login').value.trim();
-  const senha = document.getElementById('cad-senha').value.trim();
+// Mostrar login
+function mostrarLogin() {
+  document.getElementById("cadastro-box").classList.add("hidden");
+  document.getElementById("login-box").classList.remove("hidden");
+}
 
-  if (!nome || !login || !senha) {
+// Cadastrar usuário
+function cadastrarUsuario() {
+  const nome = document.getElementById("cadastro-nome").value;
+  const usuario = document.getElementById("cadastro-usuario").value;
+  const senha = document.getElementById("cadastro-senha").value;
+
+  if (!nome || !usuario || !senha) {
     alert("Preencha todos os campos!");
     return;
   }
 
-  const key = `sgp_user_${login}`;
-  if (localStorage.getItem(key)) {
-    alert("Este login já está em uso!");
+  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+  if (usuarios.find(u => u.login === usuario)) {
+    alert("Usuário já existe!");
     return;
   }
 
-  const hoje = new Date();
-  const dadosUsuario = {
-    nome,
-    login,
-    senha,
-    cadastro: hoje.toISOString(),
-    estoque: [],
-    vendas: [],
-    configuracoes: {}
-  };
-
-  localStorage.setItem(key, JSON.stringify(dadosUsuario));
-  alert("Cadastro realizado com sucesso! Agora faça o login.");
-  toggleForm('login-form');
-}
-
-// =============================
-// LOGIN
-// =============================
-function login() {
-  const login = document.getElementById('login-login').value.trim();
-  const senha = document.getElementById('login-senha').value.trim();
-
-  const key = `sgp_user_${login}`;
-  const dados = localStorage.getItem(key);
-
-  if (!dados) {
-    alert("Usuário não encontrado!");
-    return;
-  }
-
-  const usuario = JSON.parse(dados);
-
-  if (usuario.senha !== senha) {
-    alert("Senha incorreta!");
-    return;
-  }
-
-  // Verificar validade de 7 dias
-  const dataCadastro = new Date(usuario.cadastro);
-  const hoje = new Date();
-  const diasPassados = Math.floor((hoje - dataCadastro) / (1000 * 60 * 60 * 24));
-
-  if (diasPassados > 7) {
-    alert("Seu período de teste expirou. Entre em contato com o administrador.");
-    return;
-  }
-
-  usuarioLogado = usuario;
-  document.getElementById('login-container').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
-
-  renderDashboard();
-}
-
-// =============================
-// RENDERIZAR DASHBOARD
-// =============================
-function renderDashboard() {
-  document.getElementById('user-name').textContent = usuarioLogado.nome;
-
-  // Estoque
-  const estoqueList = document.getElementById('estoque-list');
-  estoqueList.innerHTML = '';
-  if (usuarioLogado.estoque.length === 0) {
-    estoqueList.innerHTML = "<p>Sem produtos cadastrados.</p>";
-  } else {
-    usuarioLogado.estoque.forEach(prod => {
-      const li = document.createElement('li');
-      li.textContent = `${prod.nome} — ${prod.quantidade} unidades`;
-      estoqueList.appendChild(li);
-    });
-  }
-
-  // Vendas
-  const vendasList = document.getElementById('vendas-list');
-  vendasList.innerHTML = '';
-  if (usuarioLogado.vendas.length === 0) {
-    vendasList.innerHTML = "<p>Nenhuma venda registrada.</p>";
-  } else {
-    usuarioLogado.vendas.forEach(venda => {
-      const li = document.createElement('li');
-      li.textContent = `${venda.data} — R$ ${venda.valor}`;
-      vendasList.appendChild(li);
-    });
-  }
-
-  // Relatório
-  const totalVendas = usuarioLogado.vendas.reduce((s, v) => s + v.valor, 0);
-  document.getElementById('relatorio-info').innerHTML = `
-    <p>Total de vendas: R$ ${totalVendas.toFixed(2)}</p>
-    <p>Produtos em estoque: ${usuarioLogado.estoque.length}</p>
-    <p>Dias restantes do teste: ${7 - Math.floor((new Date() - new Date(usuarioLogado.cadastro)) / (1000 * 60 * 60 * 24))} dias</p>
-  `;
-}
-
-// =============================
-// LOGOUT
-// =============================
-function logout() {
-  usuarioLogado = null;
-  document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('login-container').classList.remove('hidden');
-
-  // Limpa campos de login
-  document.getElementById('login-login').value = '';
-  document.getElementById('login-senha').value = '';
-}
-
-// =============================
-// ⚙️ Funções extras (adicionar produto/venda etc.)
-// =============================
-// Você pode criar botões e inputs no dashboard e associar a funções como:
-function adicionarProduto(nome, quantidade) {
-  usuarioLogado.estoque.push({ nome, quantidade });
-  salvarUsuario();
-  renderDashboard();
-}
-
-function registrarVenda(valor) {
-  usuarioLogado.vendas.push({
-    valor: parseFloat(valor),
-    data: new Date().toLocaleDateString()
+  usuarios.push({
+    nome: nome,
+    login: usuario,
+    senha: senha,
+    dataCadastro: new Date().toISOString()
   });
-  salvarUsuario();
-  renderDashboard();
+
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+  alert("Cadastro realizado com sucesso!");
+  mostrarLogin();
 }
 
-// Salvar no localStorage
-function salvarUsuario() {
-  const key = `sgp_user_${usuarioLogado.login}`;
-  localStorage.setItem(key, JSON.stringify(usuarioLogado));
+// Login usuário
+function loginUsuario() {
+  const usuario = document.getElementById("login-usuario").value;
+  const senha = document.getElementById("login-senha").value;
+
+  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  const user = usuarios.find(u => u.login === usuario && u.senha === senha);
+
+  if (!user) {
+    alert("Usuário ou senha incorretos!");
+    return;
+  }
+
+  if (!verificarAtivo(user)) {
+    alert("Seu período de teste expirou. Contate o administrador.");
+    return;
+  }
+
+  localStorage.setItem("usuarioLogado", JSON.stringify(user));
+  abrirDashboard(user);
 }
+
+// Verifica se usuário ainda está no prazo de teste
+function verificarAtivo(user) {
+  const hoje = new Date();
+  const cadastro = new Date(user.dataCadastro);
+  const diff = Math.floor((hoje - cadastro) / (1000 * 60 * 60 * 24));
+  return diff < 7; // 7 dias de teste
+}
+
+// Abre o painel do usuário
+function abrirDashboard(user) {
+  document.getElementById("login-box").classList.add("hidden");
+  document.getElementById("cadastro-box").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+
+  document.getElementById("usuario-nome").textContent = user.nome;
+
+  const hoje = new Date();
+  const cadastro = new Date(user.dataCadastro);
+  const diff = Math.floor((hoje - cadastro) / (1000 * 60 * 60 * 24));
+  const diasRestantes = 7 - diff;
+
+  document.getElementById("dias-restantes").textContent =
+    diasRestantes > 0
+      ? `⏳ Seu teste expira em ${diasRestantes} dias`
+      : "🚫 Seu teste expirou";
+}
+
+// Logout usuário
+function logoutUsuario() {
+  localStorage.removeItem("usuarioLogado");
+  document.getElementById("dashboard").classList.add("hidden");
+  mostrarLogin();
+}
+
+// Autologin se já logado
+window.onload = function() {
+  const user = JSON.parse(localStorage.getItem("usuarioLogado"));
+  if (user && verificarAtivo(user)) {
+    abrirDashboard(user);
+  }
+};
