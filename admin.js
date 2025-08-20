@@ -1,27 +1,27 @@
-// Credenciais do administrador
-const ADMIN_USER = "jhonmaranhas";
-const ADMIN_PASS = "J61772165360j";
+// Credenciais fixas do administrador
+const ADMIN_LOGIN = "jhonmaranhas";
+const ADMIN_SENHA = "J61772165360j";
 
-// Login do Admin
+// Login Admin
 function loginAdmin() {
-  const usuario = document.getElementById("admin-usuario").value;
-  const senha = document.getElementById("admin-senha").value;
+  const login = document.getElementById("admin-login-user").value.trim();
+  const senha = document.getElementById("admin-login-pass").value.trim();
 
-  if (usuario === ADMIN_USER && senha === ADMIN_PASS) {
+  if (login === ADMIN_LOGIN && senha === ADMIN_SENHA) {
     document.getElementById("admin-login").classList.add("hidden");
     document.getElementById("admin-dashboard").classList.remove("hidden");
     carregarUsuarios();
   } else {
-    alert("Usuário ou senha do admin incorretos!");
+    alert("Usuário ou senha incorretos!");
   }
 }
 
-// Logout
+// Logout Admin
 function logoutAdmin() {
   document.getElementById("admin-login").classList.remove("hidden");
   document.getElementById("admin-dashboard").classList.add("hidden");
-  document.getElementById("admin-usuario").value = "";
-  document.getElementById("admin-senha").value = "";
+  document.getElementById("admin-login-user").value = "";
+  document.getElementById("admin-login-pass").value = "";
 }
 
 // Carregar usuários
@@ -56,13 +56,13 @@ function calcularDiasRestantes(usuario) {
   return 7 - diff;
 }
 
-// Renovar usuário (+7 dias a partir de hoje)
+// Renovar usuário (7 dias a partir de hoje)
 function renovarUsuario(index) {
   const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
   usuarios[index].dataCadastro = new Date().toISOString();
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
   carregarUsuarios();
-  alert("Teste renovado por +7 dias!");
+  alert("Usuário renovado por +7 dias!");
 }
 
 // Bloquear usuário
