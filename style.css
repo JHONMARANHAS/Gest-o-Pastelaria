@@ -1,93 +1,41 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: #f5f5f5;
-  color: #333;
+  background: #121212;
+  color: #eee;
 }
 
-/* Login */
 .login-container {
-  width: 350px;
-  margin: 5% auto;
-  padding: 30px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background: #1e1e1e;
+  border-radius: 10px;
   text-align: center;
 }
 
-.login-container h1 {
-  margin-bottom: 20px;
-}
-
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-.tabs button {
-  flex: 1;
+.login-container input,
+.login-container button {
+  width: 100%;
+  margin: 10px 0;
   padding: 10px;
   border: none;
-  background: #eee;
+  border-radius: 5px;
+}
+
+.login-container button {
+  background: #4caf50;
+  color: white;
   cursor: pointer;
-}
-
-.tabs .active {
-  background: #007bff;
-  color: white;
-}
-
-.form {
-  display: none;
-  flex-direction: column;
-}
-
-.form.active {
-  display: flex;
-}
-
-.form input {
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.btn {
-  margin-top: 10px;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-}
-
-.btn-secondary {
-  background: #28a745;
-  color: white;
-}
-
-/* Painel */
-.dashboard-container {
-  display: flex;
-  min-height: 100vh;
 }
 
 .sidebar {
   width: 220px;
-  background: #1a1a2e;
-  color: white;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  background: #1e1e1e;
   padding: 20px;
-}
-
-.sidebar h2 {
-  margin-bottom: 20px;
 }
 
 .sidebar ul {
@@ -100,33 +48,19 @@ body {
 }
 
 .sidebar ul li a {
-  color: white;
+  color: #eee;
   text-decoration: none;
 }
 
 .main-content {
-  flex: 1;
+  margin-left: 240px;
   padding: 20px;
-  background: #f9f9f9;
 }
 
-.card {
-  background: white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+.section {
+  display: none;
 }
 
-.stats {
-  display: flex;
-  gap: 20px;
-}
-
-.stat {
-  flex: 1;
-  text-align: center;
-  background: #f1f1f1;
-  border-radius: 10px;
-  padding: 15px;
+.section.active {
+  display: block;
 }
