@@ -1,111 +1,93 @@
-// clientes.js - Controle de login/cadastro dos clientes com planos
-const KEY_CLIENTES = "clientes";
-const KEY_PLANOS = "planos";
+function logout() {
+  localStorage.removeItem("usuarioLogado");
+  window.location.href = "index.html";
+}
 
-function getClientes(){ return JSON.parse(localStorage.getItem(KEY_CLIENTES) || "[]"); }
-function setClientes(v){ localStorage.setItem(KEY_CLIENTES, JSON.stringify(v)); }
-function getPlanos(){ return JSON.parse(localStorage.getItem(KEY_PLANOS) || "[]"); }
-function setPlanos(v){ localStorage.setItem(KEY_PLANOS, JSON.stringify(v)); }
-
-// Garantir plano Trial se admin ainda não criou nada
-(function ensureDefaultPlans(){
-  const planos = getPlanos();
-  if(planos.length===0){
-    setPlanos([{id:'trial7',nome:'Teste 7 dias',preco:0,meses:0,recursos:['dashboard','produtos','gestao','financeiro','precificacao','dre']}]);
-  }
-})();
-
-function cadastrarCliente() {
-  const usuario = document.getElementById("usuario").value.trim();
-  const senha = document.getElementById("senha").value;
-  const email = document.getElementById("email").value.trim();
-
-  if (!usuario || !senha) {
-    alert("Preencha usuário e senha!");
-    return;
-  }
-
-  let clientes = getClientes();
-  if (clientes.find(c => c.usuario.toLowerCase() === usuario.toLowerCase())) {
-    alert("Usuário já cadastrado!");
-    return;
-  }
-
-  const hoje = new Date();
-  const vencimento = new Date();
-  vencimento.setDate(hoje.getDate() + 7); // Teste grátis de 7 dias
-
-  clientes.push({
-    usuario,
-    senha,
-    email,
-    plano: "Teste 7 dias",
-    planoId: "trial7",
-    cadastro: hoje.toISOString(),
-    vencimento: vencimento.toISOString(),
-    ativo: true
+document.querySelectorAll(".sidebar a").forEach(link => {
+  link.addEventListener("click", function() {
+    document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+    document.querySelector(this.getAttribute("href")).classList.add("active");
   });
+});
 
-  setClientes(clientes);
-  alert("Cadastro realizado com sucesso! Você já pode fazer login.");
-  document.getElementById("formCadastro").reset();
-}
+// Precificação
+document.getElementById("formPrecificacao").addEventListener("submit", function(e) {
+  e.preventDefault();
+  let nome = document.getElementById("produtoNome").value;
+  let custo = parseFloat(document.getElementById("custo").value);
+  let margem = parseFloat(document.getElementById("margem").value);
 
-function loginCliente() {
-  const usuario = document.getElementById("loginUsuario").value.trim();
-  const senha = document.getElementById("loginSenha").value;
+  let preco = custo + (custo * (margem / 100));
+  document.getElementById("resultadoPrecificacao").textContent = `Preço sugerido para ${nome}: R$ ${preco.toFixed(2)}`;
+});
 
-  const clientes = getClientes();
-  const cliente = clientes.find(c => c.usuario === usuario && c.senha === senha);
+// Compras
+document.getElementById("formCompra").addEventListener("submit", function(e) {
+  e.preventDefault();
+  let fornecedor = document.getElementById("fornecedor").value;
+  let valor = parseFloat(document.getElementById("valorCompra").value);
+  let data = document.getElementById("dataCompra").value;
 
-  if (!cliente) {
-    alert("Usuário ou senha inválidos!");
-    return;
-  }
+  let compras = JSON.parse(localStorage.getItem("compras")) || [];
+  compras.push({ fornecedor, valor, data });
+  localStorage.setItem("compras", JSON.stringify(compras));
 
-  const hoje = new Date();
-  const vencimento = new Date(cliente.vencimento);
+  carregarCompras();
+});
 
-  if (hoje > vencimento || !cliente.ativo) {
-    alert("Acesso bloqueado (plano vencido ou inativo). Contate o administrador.");
-    return;
-  }
+document.getElementById("formNotaFiscal").addEventListener("submit", function(e) {
+  e.preventDefault();
+  let codigo = document.getElementById("codigoNota").value;
+  alert("Itens da nota " + codigo + " carregados (exemplo).");
+});
 
-  localStorage.setItem("clienteLogado", JSON.stringify(cliente));
-  abrirPainelCliente(cliente);
-}
+function carregarCompras() {
+  let compras = JSON.parse(localStorage.getItem("compras")) || [];
+  let tabela = document.querySelector("#tabelaCompras tbody");
+  tabela.innerHTML = "";
 
-function abrirPainelCliente(cliente) {
-  document.getElementById("loginCliente").style.display = "none";
-  document.getElementById("painelCliente").style.display = "block";
-
-  document.getElementById("bemVindoCliente").innerText = `Bem-vindo, ${cliente.usuario}!`;
-  document.getElementById("planoCliente").innerText = cliente.plano;
-  document.getElementById("vencimentoCliente").innerText = new Date(cliente.vencimento).toLocaleDateString();
-
-  const dias = Math.ceil((new Date(cliente.vencimento) - new Date()) / (1000 * 60 * 60 * 24));
-  document.getElementById("diasRestantesCliente").innerText = (dias>=0?dias:0) + " dias";
-
-  // Esconder abas não permitidas (conforme recursos do plano)
-  const planos = getPlanos();
-  const plano = planos.find(p=>p.id===cliente.planoId);
-  const recursos = new Set(plano?.recursos || []);
-  const abas = ['dashboard','produtos','gestao','financeiro','precificacao','dre'];
-  abas.forEach(a=>{
-    const tabEl = document.getElementById(a);
-    const link = [...document.querySelectorAll('#menuCliente a')].find(l=> l.getAttribute('onclick')?.includes(`'${a}'`));
-    const allow = recursos.has(a);
-    if(tabEl) tabEl.style.display = allow ? '' : 'none';
-    if(link) link.parentElement.style.display = allow ? '' : 'none';
+  compras.forEach(c => {
+    let tr = document.createElement("tr");
+    tr.innerHTML = `<td>${c.fornecedor}</td><td>R$${c.valor.toFixed(2)}</td><td>${c.data}</td>`;
+    tabela.appendChild(tr);
   });
 }
 
-function logoutCliente() {
-  localStorage.removeItem("clienteLogado");
-  location.reload();
-}
+carregarCompras();
 
-document.addEventListener("DOMContentLoaded", () => {
-  const clienteLogado = JSON.parse(localStorage.getItem("clienteLogado") || "null");
-  if (clienteLogado) abrirPainelCliente(clienteLogado);
+// Gráficos
+const ctx = document.getElementById("graficoVendas");
+new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: ["Jan", "Fev", "Mar"],
+    datasets: [{ label: "Vendas", data: [1000, 1500, 1200] }]
+  }
+});
+
+const ctx2 = document.getElementById("graficoFinanceiro");
+new Chart(ctx2, {
+  type: "bar",
+  data: {
+    labels: ["Receita", "Despesas"],
+    datasets: [{ label: "R$", data: [5000, 3200] }]
+  }
+});
+
+const ctx3 = document.getElementById("graficoFluxoCaixa");
+new Chart(ctx3, {
+  type: "pie",
+  data: {
+    labels: ["Entrada", "Saída"],
+    datasets: [{ data: [4000, 2000] }]
+  }
+});
+
+const ctx4 = document.getElementById("graficoCompras");
+new Chart(ctx4, {
+  type: "bar",
+  data: {
+    labels: ["Semana 1", "Semana 2", "Semana 3"],
+    datasets: [{ label: "Compras (R$)", data: [800, 1200, 600] }]
+  }
 });
