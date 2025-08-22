@@ -3,34 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MasterGestor - Login</title>
+  <title>Restaurante Manager - Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="login-container">
-    <h1>MasterGestor</h1>
-    <div class="tabs">
-      <button id="btnLogin" class="active">Login</button>
-      <button id="btnCadastro">Cadastro</button>
-    </div>
-
-    <!-- Login -->
-    <form id="loginForm" class="form active">
-      <input type="text" id="loginUser" placeholder="Usuário" required>
-      <input type="password" id="loginPass" placeholder="Senha" required>
-      <button type="submit" class="btn btn-primary">Entrar</button>
+    <h1>Restaurante Manager</h1>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Usuário" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
     </form>
-
-    <!-- Cadastro -->
-    <form id="cadastroForm" class="form">
-      <input type="text" id="cadUser" placeholder="Usuário" required>
-      <input type="password" id="cadPass" placeholder="Senha" required>
-      <button type="submit" class="btn btn-secondary">Cadastrar</button>
-    </form>
-
-    <p id="mensagem"></p>
+    <p id="errorMessage" class="error"></p>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
