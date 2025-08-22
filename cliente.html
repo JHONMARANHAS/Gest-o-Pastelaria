@@ -3,72 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Cliente - MasterGestor</title>
+  <title>Painel do Cliente - Restaurante Manager</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="dashboard-container">
-    <aside class="sidebar">
-      <h2>Cliente</h2>
-      <ul>
-        <li><a href="#dashboard">📊 Dashboard</a></li>
-        <li><a href="#produtos">📦 Produtos</a></li>
-        <li><a href="#gestao">📑 Gestão</a></li>
-        <li><a href="#financeiro">💰 Financeiro</a></li>
-        <li><a href="#precificacao">📈 Precificação</a></li>
-        <li><a href="#dre">📝 DRE</a></li>
-        <li><a href="#compras">🛒 Compras</a></li>
-        <li><a href="index.html">🚪 Sair</a></li>
-      </ul>
-    </aside>
+  <div class="sidebar">
+    <h2>Painel do Cliente</h2>
+    <ul>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#produtos">Produtos</a></li>
+      <li><a href="#gestao">Gestão</a></li>
+      <li><a href="#financeiro">Financeiro</a></li>
+      <li><a href="#precificacao">Precificação</a></li>
+      <li><a href="#dre">DRE</a></li>
+      <li><a href="#compras">Compras</a></li>
+    </ul>
+    <button onclick="logout()">Sair</button>
+  </div>
 
-    <main class="main-content">
-      <section id="dashboard" class="card">
-        <h2>📊 Dashboard</h2>
-        <canvas id="graficoFinanceiro"></canvas>
-      </section>
+  <div class="main-content">
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="section active">
+      <h1>Dashboard</h1>
+      <canvas id="graficoVendas"></canvas>
+      <canvas id="graficoFinanceiro"></canvas>
+    </section>
 
-      <section id="produtos" class="card">
-        <h2>📦 Produtos</h2>
-        <p>Cadastro e gestão de produtos.</p>
-      </section>
+    <!-- PRODUTOS -->
+    <section id="produtos" class="section">
+      <h1>Gestão de Produtos</h1>
+      <div id="listaProdutos"></div>
+    </section>
 
-      <section id="gestao" class="card">
-        <h2>📑 Gestão</h2>
-        <p>Controle administrativo e relatórios.</p>
-      </section>
+    <!-- GESTÃO -->
+    <section id="gestao" class="section">
+      <h1>Gestão Operacional</h1>
+      <p>Relatórios e insights do restaurante.</p>
+    </section>
 
-      <section id="financeiro" class="card">
-        <h2>💰 Financeiro</h2>
-        <p>Controle de receitas e despesas.</p>
-      </section>
+    <!-- FINANCEIRO -->
+    <section id="financeiro" class="section">
+      <h1>Gestão Financeira</h1>
+      <canvas id="graficoFluxoCaixa"></canvas>
+    </section>
 
-      <section id="precificacao" class="card">
-        <h2>📈 Precificação</h2>
-        <p>Cálculo automático de preços.</p>
-      </section>
+    <!-- PRECIFICAÇÃO -->
+    <section id="precificacao" class="section">
+      <h1>Precificação de Produtos</h1>
+      <form id="formPrecificacao">
+        <input type="text" id="produtoNome" placeholder="Nome do produto" required>
+        <input type="number" id="custo" placeholder="Custo" required>
+        <input type="number" id="margem" placeholder="Margem (%)" required>
+        <button type="submit">Calcular</button>
+      </form>
+      <p id="resultadoPrecificacao"></p>
+    </section>
 
-      <section id="dre" class="card">
-        <h2>📝 Demonstração de Resultados</h2>
-        <p>Relatórios completos.</p>
-      </section>
+    <!-- DRE -->
+    <section id="dre" class="section">
+      <h1>DRE - Demonstrativo de Resultados</h1>
+      <div id="dreResumo"></div>
+    </section>
 
-      <section id="compras" class="card">
-        <h2>🛒 Compras</h2>
-        <ul>
-          <li>📸 Escanear ou digitar nota fiscal.</li>
-          <li>📋 Listar automaticamente itens comprados.</li>
-          <li>💰 Comparar preços com fornecedores.</li>
-          <li>📊 Relatório de custos.</li>
-          <li>🔔 Aviso de reposição de estoque.</li>
-          <li>📈 Gráficos de compras mensais.</li>
-          <li>💳 Controle de pagamentos a fornecedores.</li>
-        </ul>
-      </section>
-    </main>
+    <!-- COMPRAS -->
+    <section id="compras" class="section">
+      <h1>Gestão de Compras</h1>
+
+      <form id="formCompra">
+        <input type="text" id="fornecedor" placeholder="Fornecedor" required>
+        <input type="number" id="valorCompra" placeholder="Valor da compra" required>
+        <input type="date" id="dataCompra" required>
+        <button type="submit">Adicionar Compra</button>
+      </form>
+
+      <form id="formNotaFiscal">
+        <input type="text" id="codigoNota" placeholder="Código da Nota Fiscal">
+        <button type="submit">Buscar Itens</button>
+      </form>
+
+      <button onclick="iniciarScanner()">Escanear QR Code</button>
+      <video id="preview" width="300" height="200"></video>
+
+      <h2>Histórico de Compras</h2>
+      <table id="tabelaCompras">
+        <thead>
+          <tr>
+            <th>Fornecedor</th>
+            <th>Valor</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <canvas id="graficoCompras"></canvas>
+    </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+  <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
+  <script src="client.js"></script>
 </body>
 </html>
